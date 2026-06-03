@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Lens\Builder;
 
+use Lens\Builder;
 use Lens\Config\OpenApiConfig;
+use Lens\Extensions\Exception\ExceptionToResponse;
+use Lens\Extensions\Exception\DefaultExceptionToResponse;
 use Lens\Extensions\Operation\OperationTransformer;
 use Lens\Extensions\Operation\TempestOperationTransformer;
 use Lens\Extensions\TypeToSchema\DefaultTypeToSchema;
@@ -21,10 +24,14 @@ final class OpenApiBuilder
     /** @var OperationTransformer[] */
     private array $operationTransformers = [];
 
+    /** @var ExceptionToResponse[] */
+    private array $exceptionToResponseExtensions = [];
+
     public function __construct()
     {
         $this->typeToSchemaExtensions[] = new DefaultTypeToSchema();
         $this->operationTransformers[] = new TempestOperationTransformer();
+        $this->exceptionToResponseExtensions[] = new DefaultExceptionToResponse();
     }
 
     public function addTypeToSchemaExtension(TypeToSchemaExtension $extension): void
@@ -35,6 +42,11 @@ final class OpenApiBuilder
     public function addOperationTransformer(OperationTransformer $transformer): void
     {
         array_unshift($this->operationTransformers, $transformer);
+    }
+
+    public function addExceptionToResponseExtension(ExceptionToResponse $extension): void
+    {
+        array_unshift($this->exceptionToResponseExtensions, $extension);
     }
 
     public function buildFromInfer(Engine $engine, ?OpenApiConfig $config = null): array
@@ -50,6 +62,9 @@ final class OpenApiBuilder
                     $ext = new $extClass();
                     if ($ext instanceof TypeToSchemaExtension) {
                         $this->addTypeToSchemaExtension($ext);
+                    }
+                    if ($ext instanceof ExceptionToResponse) {
+                        $this->addExceptionToResponseExtension($ext);
                     }
                 }
             }
@@ -221,6 +236,22 @@ final class OpenApiBuilder
 
                     if ($params !== []) {
                         $operation['parameters'] = $params;
+                    }
+                }
+
+                // Process #[Throws] attributes and add exception responses
+                $throwsAttr = $meta['throws'] ?? null;
+                if ($throwsAttr !== null) {
+                    $exceptionClasses = is_array($throwsAttr) ? $throwsAttr : [$throwsAttr];
+                    foreach ($exceptionClasses as $exceptionClass) {
+                        foreach ($this->exceptionToResponseExtensions as $ext) {
+                            if ($ext->supports($exceptionClass)) {
+                                $exceptionResponses = $ext->convert($exceptionClass);
+                                foreach ($exceptionResponses as $statusCode => $responseSpec) {
+                                    $operation['responses'][$statusCode] = $responseSpec;
+                                }
+                            }
+                        }
                     }
                 }
 

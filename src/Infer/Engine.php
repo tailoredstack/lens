@@ -208,6 +208,7 @@ final class Engine
                             // attributes -> http verb + path
                             $http = null;
                             $path = null;
+                            $throws = [];
                             foreach ($stmt->attrGroups as $ag) {
                                 foreach ($ag->attrs as $attr) {
                                     $an = $attr->name->toString();
@@ -231,6 +232,19 @@ final class Engine
                                         if (isset($args[1]) && $args[1]->value instanceof Node\Scalar\String_) {
                                             $http = strtolower($args[0]->value->value);
                                             $path = $args[1]->value->value;
+                                        }
+                                    }
+
+                                    // #[Throws] attribute for exception mapping
+                                    if ($lname === 'throws') {
+                                        foreach ($attr->args as $arg) {
+                                            if ($arg->value instanceof Node\Name) {
+                                                $throws[] = $this->resolveName($arg->value->toString());
+                                            }
+                                            // Handle NotFoundException::class syntax
+                                            if ($arg->value instanceof Node\Expr\ClassConstFetch) {
+                                                $throws[] = $this->resolveName($arg->value->class->toString());
+                                            }
                                         }
                                     }
                                 }
@@ -269,6 +283,7 @@ final class Engine
                                 'params' => $params,
                                 'http' => $http,
                                 'path' => $path,
+                                'throws' => $throws !== [] ? $throws : null,
                             ];
                         }
 
