@@ -81,7 +81,7 @@ final readonly class LensConfig
         $sources = env('LENS_SOURCES');
         $sourcesArray = $sources !== null && $sources !== ''
             ? array_map('trim', explode(',', $sources))
-            : ['src'];
+            : self::discoverSources();
 
         $exclude = env('LENS_EXCLUDE');
         $excludeArray = $exclude !== null && $exclude !== ''
@@ -104,6 +104,34 @@ final readonly class LensConfig
             ),
             securitySchemes: self::parseSecuritySchemesFromEnv(),
         );
+    }
+
+    /**
+     * Auto-discover source directories from Tempest discovery config.
+     */
+    private static function discoverSources(): array
+    {
+        // Default to src/ directory
+        $sources = ['src'];
+        
+        // Try to get discovery locations from Tempest config
+        if (function_exists('config')) {
+            $discoveryConfig = config('discovery');
+            if (isset($discoveryConfig['locations']) && is_array($discoveryConfig['locations'])) {
+                // Extract unique directories from discovery locations
+                $discovered = [];
+                foreach ($discoveryConfig['locations'] as $location) {
+                    if (is_string($location) && is_dir($location)) {
+                        $discovered[] = $location;
+                    }
+                }
+                if ($discovered !== []) {
+                    $sources = array_unique($discovered);
+                }
+            }
+        }
+        
+        return $sources;
     }
 
     /**

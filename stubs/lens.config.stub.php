@@ -15,7 +15,7 @@ use function Tempest\env;
  * - LENS_TITLE: API title
  * - LENS_VERSION: API version
  * - LENS_BASE_PATH: Base path
- * - LENS_SOURCES: Comma-separated source directories
+ * - LENS_SOURCES: Comma-separated source directories (default: auto-discover)
  * - LENS_EXCLUDE: Comma-separated namespaces to exclude
  * - LENS_SCALAR_ENABLED: Enable Scalar viewer
  * - LENS_SCALAR_ROUTE: Scalar viewer route
@@ -26,10 +26,15 @@ use function Tempest\env;
  */
 return new LensConfig(
     // Basic configuration
+    // sources: Auto-discovers from Tempest discovery locations
     title: env('LENS_TITLE', env('APP_NAME', 'Tempest') . ' API'),
     version: env('LENS_VERSION', '1.0.0'),
     basePath: env('LENS_BASE_PATH', '/'),
-    sources: explode(',', env('LENS_SOURCES', 'src')),
+    
+    // Override auto-discovery with explicit sources:
+    // sources: ['src', 'modules'],
+    
+    // Exclude namespaces
     exclude: array_filter(explode(',', env('LENS_EXCLUDE', ''))),
     
     // Scalar viewer configuration

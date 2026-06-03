@@ -31,7 +31,7 @@ final class LensInstaller
         $this->console->writeln('<fg=yellow>╰──────────────────────────────────────────╯</>');
         $this->console->writeln('');
 
-        // Auto-publish config (skips if file exists)
+        // Publish config file
         $this->publishConfig();
 
         $this->console->writeln('');
@@ -39,7 +39,7 @@ final class LensInstaller
         $this->console->writeln('');
         $this->console->writeln('  <fg=cyan>Commands:</>');
         $this->console->writeln('    <fg=white>php bin/lens generate</>     - Generate OpenAPI spec');
-        $this->console->writeln('    <fg=white>php bin/lens config:publish</> - Publish config file');
+        $this->console->writeln('    <fg=white>php bin/lens config:publish</> - Re-publish config');
         $this->console->writeln('');
         $this->console->writeln('  <fg=cyan>Routes (auto-registered):</>');
         $this->console->writeln('    <fg=white>/docs</>         - Scalar API documentation viewer');

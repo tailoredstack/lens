@@ -21,20 +21,20 @@ composer require lens/openapi
 
 ### Install via Tempest CLI
 
-Lens registers an installer that automatically publishes the configuration file:
+After installing the package, run the Tempest installer to publish the configuration file:
 
 ```bash
 php bin/tempest install lens
 ```
 
 This will:
-1. Create `app/lens.config.php` with minimal stub
-2. Register Scalar viewer routes (`/docs`, `/openapi.json`)
-3. Configure environment variable support
+1. **Publish** `app/lens.config.php` with default configuration
+2. Register Scalar viewer routes (`/docs`, `/openapi.json`) via bootable
+3. Show available commands and routes
 
 ### Manual Installation
 
-Copy the configuration file manually:
+If you skipped the installer or want to re-publish:
 
 ```bash
 php bin/lens config:publish
@@ -50,6 +50,10 @@ LENS_VERSION=2.0.0
 LENS_BASE_PATH=/api/v1
 LENS_SCALAR_ROUTE=/docs
 ```
+
+### Auto-Discovery
+
+By default, Lens auto-discovers source directories from Tempest's discovery configuration. You can override this in your config file or via `LENS_SOURCES` environment variable.
 
 ## Quick Start
 
@@ -75,9 +79,17 @@ Scalar viewer serves your OpenAPI spec with interactive API explorer.
 
 ## Configuration
 
+Lens uses a simple configuration pattern:
+
+### Config Class (`src/Config/LensConfig.php`)
+
+The `LensConfig` class defines all configuration options with sensible defaults. It can load from:
+1. **Config file** (`app/lens.config.php`) - Returns `new LensConfig(...)`
+2. **Environment variables** - `LensConfig::fromEnv()` (fallback)
+
 ### Config File (`app/lens.config.php`)
 
-After running `php bin/tempest install lens`, a minimal stub is created:
+After running `php bin/tempest install lens`, a stub is auto-published:
 
 ```php
 return new LensConfig(
@@ -93,7 +105,22 @@ return new LensConfig(
 );
 ```
 
-Customize by editing the file or using environment variables.
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `LENS_SOURCES` | Comma-separated source directories | `src` |
+| `LENS_TITLE` | API title | `Tempest API` |
+| `LENS_VERSION` | API version | `1.0.0` |
+| `LENS_BASE_PATH` | Base path for API | `/` |
+| `LENS_EXCLUDE` | Namespaces to exclude | — |
+| `LENS_INCLUDE_INTERNAL` | Include `__*` methods | `false` |
+| `LENS_SCALAR_ENABLED` | Enable Scalar viewer | `true` |
+| `LENS_SCALAR_ROUTE` | Scalar viewer route | `/docs` |
+| `LENS_SCALAR_SPEC_ROUTE` | OpenAPI JSON route | `/openapi.json` |
+| `LENS_SCALAR_TITLE` | Scalar page title | `API Documentation` |
+| `LENS_SCALAR_SPEC_URL` | External spec URL | — |
+| `LENS_SECURITY_SCHEMES` | JSON string of security schemes | — |
 
 ### Environment Variables
 
