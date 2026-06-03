@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "php-modern": {
+      "source": "yuniorglez/gemini-elite-core",
+      "sourceType": "github",
+      "skillPath": "skills/php-modern/SKILL.md",
+      "computedHash": "e4df2bc9ae0c74f98f1f2fbb0189bbf7eedad8d6a4588baa02f2aafbe8d10b52"
+    }
+  }
+}

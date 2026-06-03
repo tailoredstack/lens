@@ -32,6 +32,9 @@ jobs:
       - name: Lint
         run: composer lint -- --reporting-format=github
 
+      - name: Static analysis
+        run: composer analyze -- --reporting-format=github --minimum-fail-level=warning
+
   type-coverage:
     name: Type coverage (100%)
     runs-on: ubuntu-latest
@@ -45,7 +48,7 @@ jobs:
           coverage: none
 
       - name: Install dependencies
-        run: composer update --prefer-dist --no-interaction
+        run: composer update --prefer-dist --no-interaction --ignore-platform-reqs
 
       - name: Check type coverage
         run: composer type-coverage

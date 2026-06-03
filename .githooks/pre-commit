@@ -20,11 +20,23 @@ else
         echo "✗ Lint failed."
         exit 1
     }
+
+    echo "→ Static analysis..."
+    vendor/bin/mago analyze src --minimum-fail-level=warning 2>/dev/null || {
+        echo "✗ Static analysis failed."
+        exit 1
+    }
 fi
 
+echo "→ Type coverage..."
+vendor/bin/pest --type-coverage --min=100 --compact 2>/dev/null || {
+    echo "✗ Type coverage below 100%."
+    exit 1
+}
+
 echo "→ Running tests..."
-vendor/bin/pest --quiet --min=100 2>/dev/null || {
-    echo "✗ Tests failed or coverage below 100%."
+vendor/bin/pest --quiet --no-coverage 2>/dev/null || {
+    echo "✗ Tests failed."
     exit 1
 }
 

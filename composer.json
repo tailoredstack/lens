@@ -1,5 +1,5 @@
 {
-    "name": "tempest/openapi",
+    "name": "lens/openapi",
     "description": "OpenAPI 3.1 spec generator for Tempest PHP — static analysis, no runtime execution.",
     "type": "library",
     "license": "MIT",
@@ -22,16 +22,17 @@
     },
     "require-dev": {
         "pestphp/pest": "^3.0",
+        "pestphp/pest-plugin-type-coverage": "^3.6",
         "carthage-software/mago": "^1.16"
     },
     "autoload": {
         "psr-4": {
-            "Tempest\\OpenApi\\": "src"
+            "Lens\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Tempest\\OpenApi\\Tests\\": "tests"
+            "Lens\\Tests\\": "tests"
         }
     },
     "extra": {
@@ -41,20 +42,27 @@
     },
     "scripts": {
         "setup": "git config core.hooksPath .githooks",
-        "type-coverage": "php bin/type-coverage.php",
+        "type-coverage": "vendor/bin/pest --type-coverage --min=100 --compact",
         "test": "vendor/bin/pest --coverage --min=100",
+        "test:ci": "@test",
+        "test:local": "vendor/bin/pest --no-coverage",
         "fmt": "vendor/bin/mago fmt",
         "fmt:check": "vendor/bin/mago fmt --check",
         "lint": "vendor/bin/mago lint",
+        "analyze": "vendor/bin/mago analyze src --minimum-fail-level=warning",
         "qa": [
             "@fmt:check",
             "@lint",
+            "@analyze",
             "@type-coverage",
             "@test"
         ]
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
     },
     "minimum-stability": "dev",
     "prefer-stable": true

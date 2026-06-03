@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // Pest test configuration.
-// Core tests (Infer engine, Type system, OpenAPI builder) can extend PHPUnit\Framework\TestCase directly.
-// Integration tests that need Tempest boot extend Tempest\OpenApi\Tests\TestCase.
+// Core tests (Infer engine, Type system, OpenAPI builder) use Pest's test()/it() functions.
+// Integration tests needing Tempest boot use uses(TempestTestCase::class).
