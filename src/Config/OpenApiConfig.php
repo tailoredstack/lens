@@ -18,5 +18,6 @@ final readonly class OpenApiConfig
         public ?string $apiDomain = null,
         public ?array $servers = null,
         public array $extensions = [],
+        public array $securitySchemes = [],
     ) {}
 }

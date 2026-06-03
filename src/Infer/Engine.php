@@ -209,6 +209,7 @@ final class Engine
                             $http = null;
                             $path = null;
                             $throws = [];
+                            $meta = [];
                             foreach ($stmt->attrGroups as $ag) {
                                 foreach ($ag->attrs as $attr) {
                                     $an = $attr->name->toString();
@@ -245,6 +246,30 @@ final class Engine
                                             if ($arg->value instanceof Node\Expr\ClassConstFetch) {
                                                 $throws[] = $this->resolveName($arg->value->class->toString());
                                             }
+                                        }
+                                    }
+
+                                    // #[Auth] attribute for security
+                                    if ($lname === 'auth') {
+                                        $guard = 'default';
+                                        if (isset($attr->args[0]) && $attr->args[0]->value instanceof Node\Scalar\String_) {
+                                            $guard = $attr->args[0]->value->value;
+                                        }
+                                        $meta['auth'] = $guard;
+                                    }
+
+                                    // #[AllowGuest] attribute for public access
+                                    if ($lname === 'allowguest') {
+                                        $meta['allowGuest'] = true;
+                                    }
+
+                                    // #[Can] attribute for permissions
+                                    if ($lname === 'can') {
+                                        if (!isset($meta['permissions'])) {
+                                            $meta['permissions'] = [];
+                                        }
+                                        if (isset($attr->args[0]) && $attr->args[0]->value instanceof Node\Scalar\String_) {
+                                            $meta['permissions'][] = $attr->args[0]->value->value;
                                         }
                                     }
                                 }
@@ -284,7 +309,7 @@ final class Engine
                                 'http' => $http,
                                 'path' => $path,
                                 'throws' => $throws !== [] ? $throws : null,
-                            ];
+                            ] + $meta;
                         }
 
                         $this->collected[$fqcn] = new NamedObjectType($fqcn, ...$props);

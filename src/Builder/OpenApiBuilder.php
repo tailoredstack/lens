@@ -99,6 +99,24 @@ final class OpenApiBuilder
             $servers = [['url' => $serverUrl]];
         }
 
+        // Build components
+        $components = ['schemas' => $schemas];
+        
+        // Add security schemes from config or defaults
+        $securitySchemes = $config->securitySchemes ?? [];
+        
+        // Add default bearer auth if not provided and security is used
+        if (!isset($securitySchemes['bearerAuth'])) {
+            $securitySchemes['bearerAuth'] = [
+                'type' => 'http',
+                'scheme' => 'bearer',
+            ];
+        }
+        
+        if ($securitySchemes !== []) {
+            $components['securitySchemes'] = $securitySchemes;
+        }
+
         return [
             'openapi' => '3.1.0',
             'info' => [
@@ -107,9 +125,7 @@ final class OpenApiBuilder
             ],
             'servers' => $servers,
             'paths' => $this->buildPaths($operations, $config, $engine),
-            'components' => [
-                'schemas' => $schemas,
-            ],
+            'components' => $components,
         ];
     }
 
@@ -253,6 +269,22 @@ final class OpenApiBuilder
                             }
                         }
                     }
+                }
+
+                // Process security attributes
+                if (isset($meta['allowGuest']) && $meta['allowGuest'] === true) {
+                    // Explicitly mark as public (no security required)
+                    $operation['security'] = [];
+                } elseif (isset($meta['auth'])) {
+                    // Add security requirement based on guard
+                    $guard = $meta['auth'];
+                    $securityScheme = $guard === 'default' ? 'bearerAuth' : $guard . 'Auth';
+                    $operation['security'] = [[$securityScheme => []]];
+                }
+
+                // Process permissions
+                if (isset($meta['permissions']) && is_array($meta['permissions'])) {
+                    $operation['x-permissions'] = $meta['permissions'];
                 }
 
                 $paths[$path][$verb] = $operation;
