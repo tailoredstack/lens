@@ -371,6 +371,10 @@ final class Engine
                             if (in_array($name, ['string', 'int', 'float', 'bool'], true)) {
                                 return new ScalarType($name);
                             }
+                            // array type
+                            if ($name === 'array') {
+                                return new \Lens\Types\ArrayType(new MixedType(), true);
+                            }
                             // fallback
                             return new MixedType();
                         }

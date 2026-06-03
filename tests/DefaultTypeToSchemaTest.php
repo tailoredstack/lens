@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Extensions;
+namespace Tests;
 
 use Lens\Extensions\TypeToSchema\DefaultTypeToSchema;
 use Lens\Types\ArrayType;

@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace Tests;
+
 use Lens\Types\ArrayType;
 use Lens\Types\EnumType;
 use Lens\Types\GenericType;
