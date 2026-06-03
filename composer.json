@@ -1,5 +1,5 @@
 {
-    "name": "lens/openapi",
+    "name": "tailoredstack/lens",
     "description": "OpenAPI 3.1 spec generator for Tempest PHP — static analysis, no runtime execution.",
     "type": "library",
     "license": "MIT",
