@@ -207,7 +207,8 @@ final class OpenApiBuilder
                         $methodName,
                         $meta['return'],
                         $meta['params'],
-                        $schemaConverter
+                        $schemaConverter,
+                        $meta
                     );
                     if ($operation !== null) {
                         break;
@@ -236,12 +237,19 @@ final class OpenApiBuilder
                         // Check if param should be path parameter
                         $isPathParam = str_contains($path, '{' . $paramName . '}');
 
-                        $params[] = [
+                        $param = [
                             'name' => $paramName,
                             'in' => $isPathParam ? 'path' : 'query',
                             'required' => $isPathParam,
                             'schema' => $this->schemaFromType($paramType),
                         ];
+                        
+                        // Add param description from docblock
+                        if (isset($meta['paramDescriptions'][$paramName])) {
+                            $param['description'] = $meta['paramDescriptions'][$paramName];
+                        }
+                        
+                        $params[] = $param;
                     }
 
                     $operation = [
@@ -253,6 +261,33 @@ final class OpenApiBuilder
                     if ($params !== []) {
                         $operation['parameters'] = $params;
                     }
+                }
+                
+                // Apply docblock metadata
+                if (isset($meta['summary']) && $meta['summary'] !== '') {
+                    $operation['summary'] = $meta['summary'];
+                }
+                
+                if (isset($meta['description']) && $meta['description'] !== '') {
+                    $operation['description'] = $meta['description'];
+                }
+                
+                if (isset($meta['tags']) && is_array($meta['tags'])) {
+                    $operation['tags'] = $meta['tags'];
+                }
+                
+                if (isset($meta['deprecated']) && $meta['deprecated'] === true) {
+                    $operation['deprecated'] = true;
+                }
+                
+                // Apply return description to response
+                if (isset($meta['returnDescription']) && isset($operation['responses']['200'])) {
+                    $operation['responses']['200']['description'] = $meta['returnDescription'];
+                }
+                
+                // Apply example to requestBody
+                if (isset($meta['example']) && isset($operation['requestBody'])) {
+                    $operation['requestBody']['content']['application/json']['example'] = $meta['example'];
                 }
 
                 // Process #[Throws] attributes and add exception responses

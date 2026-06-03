@@ -22,7 +22,8 @@ final class TempestOperationTransformer implements OperationTransformer
         string $method,
         Type $returnType,
         array $params,
-        \Closure $schemaConverter
+        \Closure $schemaConverter,
+        array $meta = []
     ): ?array {
         // Skip if void return
         if ($returnType instanceof VoidType) {
@@ -74,11 +75,18 @@ final class TempestOperationTransformer implements OperationTransformer
                     $operation['requestBody']['__required'] = array_merge($operation['requestBody']['__required'], $expanded['required']);
                 }
             } elseif ($this->isScalarType($paramType)) {
-                $queryParams[] = [
+                $paramSchema = [
                     'name' => $paramName,
                     'in' => 'query',
                     'schema' => $schemaConverter($paramType),
                 ];
+                
+                // Add description from docblock
+                if (isset($meta['paramDescriptions'][$paramName])) {
+                    $paramSchema['description'] = $meta['paramDescriptions'][$paramName];
+                }
+                
+                $queryParams[] = $paramSchema;
             } else {
                 // Assume body for complex types
                 $bodyParams[$paramName] = $schemaConverter($paramType);

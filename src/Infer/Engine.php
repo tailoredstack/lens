@@ -286,6 +286,13 @@ final class Engine
                                 }
                             }
 
+                            // Parse docblock for summary, description, tags, etc.
+                            if ($stmt->getDocComment() !== null) {
+                                $doc = $stmt->getDocComment()->getText();
+                                $docMeta = $this->parseDocblock($doc);
+                                $meta = array_merge($meta, $docMeta);
+                            }
+
                             $params = [];
                             foreach ($stmt->params as $p) {
                                 $pname = is_string($p->var->name) ? $p->var->name : (string) $p->var->name;
@@ -338,6 +345,68 @@ final class Engine
                         }
 
                         return $name;
+                    }
+
+                    private function parseDocblock(string $doc): array
+                    {
+                        $meta = [];
+                        
+                        // Remove /** and */ and leading * from each line
+                        $lines = explode("\n", $doc);
+                        $cleanLines = [];
+                        foreach ($lines as $line) {
+                            $line = preg_replace('/^\s*\*\s?/', '', trim($line));
+                            if ($line !== '' && $line !== '/' && !str_starts_with($line, '/')) {
+                                $cleanLines[] = $line;
+                            }
+                        }
+                        $cleanDoc = implode("\n", $cleanLines);
+                        
+                        // Extract summary (first line before any @tags)
+                        if (preg_match('/^([^\n@]+)/', $cleanDoc, $m)) {
+                            $meta['summary'] = trim($m[1]);
+                        }
+                        
+                        // Extract description (text between summary and first @tag)
+                        if (preg_match('/^[^\n@]+\n+((?:[^\n@][^\n]*\n*)*)(?=@|\z)/', $cleanDoc, $m)) {
+                            $desc = trim($m[1]);
+                            if ($desc !== '') {
+                                $meta['description'] = $desc;
+                            }
+                        }
+                        
+                        // Extract @deprecated
+                        if (preg_match('/@deprecated\b/', $cleanDoc)) {
+                            $meta['deprecated'] = true;
+                        }
+                        
+                        // Extract @param descriptions
+                        if (preg_match_all('/@param\s+(?:\S+\s+)?\$([a-zA-Z_][a-zA-Z0-9_]*)\s+(.+)/', $cleanDoc, $matches, PREG_SET_ORDER)) {
+                            $paramDescriptions = [];
+                            foreach ($matches as $m) {
+                                $paramDescriptions[$m[1]] = trim($m[2]);
+                            }
+                            if ($paramDescriptions !== []) {
+                                $meta['paramDescriptions'] = $paramDescriptions;
+                            }
+                        }
+                        
+                        // Extract @return description
+                        if (preg_match('/@return\s+\S+\s+(.+)/', $cleanDoc, $m)) {
+                            $meta['returnDescription'] = trim($m[1]);
+                        }
+                        
+                        // Extract @example
+                        if (preg_match('/@example\s+(\{.+\})/', $cleanDoc, $m)) {
+                            $meta['example'] = $m[1];
+                        }
+                        
+                        // Extract @tag
+                        if (preg_match_all('/@tag\s+(\S+)/', $cleanDoc, $matches)) {
+                            $meta['tags'] = $matches[1];
+                        }
+                        
+                        return $meta;
                     }
 
                     private function mapDocVar(string $doc)

@@ -15,6 +15,7 @@ interface OperationTransformer
     /**
      * @param array<array{name: string, type: Type}> $params
      * @param \Closure(Type): array $schemaConverter
+     * @param array $meta Additional metadata (docblock, attributes)
      */
     public function transform(
         Engine $engine,
@@ -22,6 +23,7 @@ interface OperationTransformer
         string $method,
         Type $returnType,
         array $params,
-        \Closure $schemaConverter
+        \Closure $schemaConverter,
+        array $meta = []
     ): ?array;
 }
