@@ -1,7 +1,7 @@
 # TODO — Lens OpenAPI Live Status
 
 > **Updated:** 2026-06-04
-> **Status:** Phase 0.5 complete — core implementation functional
+> **Status:** Phase 0.5 complete — 29 tests passing, extension system ready
 
 ---
 
@@ -28,9 +28,12 @@
 - [x] Infer engine: AST parsing, type inference, namespace resolution, docblock parsing
 - [x] OpenAPI builder: type→schema mapping, path generation, operation discovery
 - [x] CLI: JSON/YAML output, exclude patterns, include-internal flag
-- [x] 18 tests — all passing, 100% type coverage
+- [x] 29 tests — all passing (TypeTest, DefaultTypeToSchemaTest, OpenApiDiscoveryTest, FacadeTest)
 - [x] CI pipeline: fmt → lint → analyze → type-coverage → tests
 - [x] Pre-commit hook: all QA checks
+- [x] Extension system: TypeToSchemaExtension, OperationTransformer, ExceptionToResponse
+- [x] Tempest integration: Discovery, Console Command, Installer
+- [x] Configuration: lens.config.php with env() support
 
 ## In Progress
 
