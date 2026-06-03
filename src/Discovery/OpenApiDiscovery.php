@@ -6,7 +6,6 @@ namespace Lens\Discovery;
 
 use Lens\Config\OpenApiConfig;
 use Lens\Facade;
-use Lens\OpenApi;
 use Tempest\Discovery\Discovery;
 use Tempest\Discovery\DiscoveryLocation;
 

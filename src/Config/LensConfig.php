@@ -58,7 +58,7 @@ final readonly class LensConfig
         /**
          * Scalar viewer configuration.
          */
-        public ScalarConfig $scalar = new ScalarConfig,
+        public ScalarConfig $scalar = new ScalarConfig(),
 
         /**
          * Security schemes for OpenAPI spec.
@@ -79,14 +79,16 @@ final readonly class LensConfig
     public static function fromEnv(): self
     {
         $sources = env('LENS_SOURCES');
-        $sourcesArray = $sources !== null && $sources !== ''
-            ? array_map('trim', explode(',', $sources))
-            : self::discoverSources();
+        $sourcesArray =
+            $sources !== null && $sources !== ''
+                ? array_map('trim', explode(',', $sources))
+                : self::discoverSources();
 
         $exclude = env('LENS_EXCLUDE');
-        $excludeArray = $exclude !== null && $exclude !== ''
-            ? array_map('trim', explode(',', $exclude))
-            : [];
+        $excludeArray =
+            $exclude !== null && $exclude !== ''
+                ? array_map('trim', explode(',', $exclude))
+                : [];
 
         return new self(
             sources: $sourcesArray,
@@ -113,7 +115,7 @@ final readonly class LensConfig
     {
         // Default to src/ directory
         $sources = ['src'];
-        
+
         // Try to get discovery locations from Tempest config
         if (function_exists('config')) {
             $discoveryConfig = config('discovery');
@@ -130,7 +132,7 @@ final readonly class LensConfig
                 }
             }
         }
-        
+
         return $sources;
     }
 

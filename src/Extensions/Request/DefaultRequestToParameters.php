@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Lens\Extensions\Request;
 
-use Lens\Infer\Engine;
-use Lens\Types\Type;
-
 /**
  * Default implementation that transforms Tempest Request DTOs into OpenAPI parameters.
  */

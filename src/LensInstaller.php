@@ -7,6 +7,7 @@ namespace Lens;
 use Tempest\Console\Console;
 use Tempest\Core\Installer;
 use Tempest\Core\PublishesFiles;
+
 use function Tempest\app_path;
 use function Tempest\root_path;
 
@@ -51,13 +52,13 @@ final class LensInstaller
 
     /**
      * Publish the lens.config.php file to the application.
-     * 
+     *
      * Installs in app/ directory if it exists, otherwise in root.
      */
     public function publishConfig(): void
     {
         $sourcePath = __DIR__ . '/../stubs/lens.config.stub.php';
-        
+
         // Determine target path
         $targetPath = null;
         if (is_dir(app_path())) {
@@ -74,7 +75,7 @@ final class LensInstaller
 
         // Ensure directory exists
         $targetDir = dirname($targetPath);
-        if (!is_dir($targetDir)) {
+        if (! is_dir($targetDir)) {
             mkdir($targetDir, 0755, true);
         }
 

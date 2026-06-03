@@ -10,15 +10,15 @@ use Lens\Extensions\Validation\DefaultValidationRuleToConstraint;
 
 test('MinLength rule converts to minLength constraint', function () {
     $extension = new DefaultValidationRuleToConstraint();
-    
+
     // Mock MinLength rule
     $rule = new class {
         public int $length = 5;
     };
-    
+
     // Test the conversion logic directly
     $result = $extension->convert($rule);
-    
+
     // Since we can't easily instantiate Tempest rules, test the supports method
     expect($extension->supports('Tempest\Validation\Rules\MinLength'))->toBeTrue();
 });
@@ -60,18 +60,18 @@ test('Between rule converts to minimum and maximum constraints', function () {
 
 test('Unknown rule returns empty array', function () {
     $extension = new DefaultValidationRuleToConstraint();
-    
+
     $rule = new class {
         public string $name = 'unknown';
     };
-    
+
     $result = $extension->convert($rule);
-    
+
     expect($result)->toBe([]);
 });
 
 test('ValidationRuleToConstraint interface is implemented', function () {
     $extension = new DefaultValidationRuleToConstraint();
-    
+
     expect($extension)->toBeInstanceOf(\Lens\Extensions\Validation\ValidationRuleToConstraint::class);
 });

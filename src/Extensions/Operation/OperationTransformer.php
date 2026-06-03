@@ -24,6 +24,6 @@ interface OperationTransformer
         Type $returnType,
         array $params,
         \Closure $schemaConverter,
-        array $meta = []
+        array $meta = [],
     ): ?array;
 }

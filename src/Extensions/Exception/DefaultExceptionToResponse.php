@@ -47,29 +47,29 @@ class DefaultExceptionToResponse implements ExceptionToResponse
             'description' => 'Bad Request - Invalid request syntax',
         ],
     ];
-    
+
     public function supports(string $exceptionClass): bool
     {
         return isset(self::EXCEPTION_MAP[$exceptionClass]);
     }
-    
+
     public function convert(string $exceptionClass): array
     {
-        if (!isset(self::EXCEPTION_MAP[$exceptionClass])) {
+        if (! isset(self::EXCEPTION_MAP[$exceptionClass])) {
             return [];
         }
-        
+
         $mapping = self::EXCEPTION_MAP[$exceptionClass];
         $status = (string) $mapping['status'];
-        
+
         $response = [
             'description' => $mapping['description'],
         ];
-        
+
         if (isset($mapping['content'])) {
             $response['content'] = $mapping['content'];
         }
-        
+
         return [$status => $response];
     }
 }

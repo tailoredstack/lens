@@ -4,17 +4,15 @@ declare(strict_types=1);
 
 namespace Lens\Builder;
 
-use Lens\Builder;
 use Lens\Config\OpenApiConfig;
-use Lens\Extensions\Exception\ExceptionToResponse;
 use Lens\Extensions\Exception\DefaultExceptionToResponse;
+use Lens\Extensions\Exception\ExceptionToResponse;
 use Lens\Extensions\Operation\OperationTransformer;
 use Lens\Extensions\Operation\TempestOperationTransformer;
 use Lens\Extensions\TypeToSchema\DefaultTypeToSchema;
 use Lens\Extensions\TypeToSchema\TypeToSchemaExtension;
 use Lens\Infer\Engine;
 use Lens\Types\NamedObjectType;
-use Lens\Types\PropertyType;
 
 final class OpenApiBuilder
 {
@@ -101,18 +99,18 @@ final class OpenApiBuilder
 
         // Build components
         $components = ['schemas' => $schemas];
-        
+
         // Add security schemes from config or defaults
         $securitySchemes = $config->securitySchemes ?? [];
-        
+
         // Add default bearer auth if not provided and security is used
-        if (!isset($securitySchemes['bearerAuth'])) {
+        if (! isset($securitySchemes['bearerAuth'])) {
             $securitySchemes['bearerAuth'] = [
                 'type' => 'http',
                 'scheme' => 'bearer',
             ];
         }
-        
+
         if ($securitySchemes !== []) {
             $components['securitySchemes'] = $securitySchemes;
         }
@@ -164,7 +162,7 @@ final class OpenApiBuilder
 
             foreach ($methods as $name => $meta) {
                 $methodName = is_string($name) ? $name : (string) $name;
-                
+
                 // skip internal methods unless configured otherwise
                 if (! $includeInternal && str_starts_with($methodName, '__')) {
                     continue;
@@ -199,7 +197,7 @@ final class OpenApiBuilder
                 // Use operation transformers to build the operation
                 $operation = null;
                 $schemaConverter = \Closure::fromCallable([$this, 'schemaFromType']);
-                
+
                 foreach ($this->operationTransformers as $transformer) {
                     $operation = $transformer->transform(
                         $engine,
@@ -208,7 +206,7 @@ final class OpenApiBuilder
                         $meta['return'],
                         $meta['params'],
                         $schemaConverter,
-                        $meta
+                        $meta,
                     );
                     if ($operation !== null) {
                         break;
@@ -243,12 +241,12 @@ final class OpenApiBuilder
                             'required' => $isPathParam,
                             'schema' => $this->schemaFromType($paramType),
                         ];
-                        
+
                         // Add param description from docblock
                         if (isset($meta['paramDescriptions'][$paramName])) {
                             $param['description'] = $meta['paramDescriptions'][$paramName];
                         }
-                        
+
                         $params[] = $param;
                     }
 
@@ -262,29 +260,29 @@ final class OpenApiBuilder
                         $operation['parameters'] = $params;
                     }
                 }
-                
+
                 // Apply docblock metadata
                 if (isset($meta['summary']) && $meta['summary'] !== '') {
                     $operation['summary'] = $meta['summary'];
                 }
-                
+
                 if (isset($meta['description']) && $meta['description'] !== '') {
                     $operation['description'] = $meta['description'];
                 }
-                
+
                 if (isset($meta['tags']) && is_array($meta['tags'])) {
                     $operation['tags'] = $meta['tags'];
                 }
-                
+
                 if (isset($meta['deprecated']) && $meta['deprecated'] === true) {
                     $operation['deprecated'] = true;
                 }
-                
+
                 // Apply return description to response
                 if (isset($meta['returnDescription']) && isset($operation['responses']['200'])) {
                     $operation['responses']['200']['description'] = $meta['returnDescription'];
                 }
-                
+
                 // Apply example to requestBody
                 if (isset($meta['example']) && isset($operation['requestBody'])) {
                     $operation['requestBody']['content']['application/json']['example'] = $meta['example'];

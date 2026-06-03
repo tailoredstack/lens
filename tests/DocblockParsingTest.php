@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Tests;
 
-use Lens\Infer\Engine;
 use Lens\Builder\OpenApiBuilder;
 use Lens\Config\OpenApiConfig;
+use Lens\Infer\Engine;
 
 // Phase 2.3: Docblock parsing tests (tags, descriptions, summaries)
 
 test('Builder extracts summary from docblock', function () {
     $tmpDir = sys_get_temp_dir() . '/lens_test_' . uniqid();
     mkdir($tmpDir, 0777, true);
-    
+
     file_put_contents($tmpDir . '/UserController.php', '<?php
 namespace App\Http\Controllers;
 
@@ -29,18 +29,18 @@ class UserController {
     }
 }
 ');
-    
+
     $engine = new Engine([$tmpDir]);
     $engine->analyze();
-    
+
     $builder = new OpenApiBuilder();
     $config = new OpenApiConfig();
     $spec = $builder->buildFromInfer($engine, $config);
-    
+
     $operation = $spec['paths']['/users']['get'];
-    
+
     expect($operation['summary'])->toBe('List all active users');
-    
+
     unlink($tmpDir . '/UserController.php');
     rmdir($tmpDir);
 });
@@ -48,7 +48,7 @@ class UserController {
 test('Builder extracts description from docblock', function () {
     $tmpDir = sys_get_temp_dir() . '/lens_test_' . uniqid();
     mkdir($tmpDir, 0777, true);
-    
+
     file_put_contents($tmpDir . '/UserController.php', '<?php
 namespace App\Http\Controllers;
 
@@ -67,20 +67,20 @@ class UserController {
     }
 }
 ');
-    
+
     $engine = new Engine([$tmpDir]);
     $engine->analyze();
-    
+
     $builder = new OpenApiBuilder();
     $config = new OpenApiConfig();
     $spec = $builder->buildFromInfer($engine, $config);
-    
+
     $operation = $spec['paths']['/users']['get'];
-    
+
     expect($operation['summary'])->toBe('List all active users');
     expect($operation['description'])->toContain('Returns a paginated list');
     expect($operation['description'])->toContain('Only returns users with active status');
-    
+
     unlink($tmpDir . '/UserController.php');
     rmdir($tmpDir);
 });
@@ -88,7 +88,7 @@ class UserController {
 test('Builder extracts tags from docblock', function () {
     $tmpDir = sys_get_temp_dir() . '/lens_test_' . uniqid();
     mkdir($tmpDir, 0777, true);
-    
+
     file_put_contents($tmpDir . '/UserController.php', '<?php
 namespace App\Http\Controllers;
 
@@ -107,19 +107,19 @@ class UserController {
     }
 }
 ');
-    
+
     $engine = new Engine([$tmpDir]);
     $engine->analyze();
-    
+
     $builder = new OpenApiBuilder();
     $config = new OpenApiConfig();
     $spec = $builder->buildFromInfer($engine, $config);
-    
+
     $operation = $spec['paths']['/users']['get'];
-    
+
     expect($operation['tags'])->toContain('Users');
     expect($operation['tags'])->toContain('Admin');
-    
+
     unlink($tmpDir . '/UserController.php');
     rmdir($tmpDir);
 });
@@ -127,7 +127,7 @@ class UserController {
 test('Builder extracts parameter descriptions from docblock', function () {
     $tmpDir = sys_get_temp_dir() . '/lens_test_' . uniqid();
     mkdir($tmpDir, 0777, true);
-    
+
     file_put_contents($tmpDir . '/UserController.php', '<?php
 namespace App\Http\Controllers;
 
@@ -145,19 +145,19 @@ class UserController {
     }
 }
 ');
-    
+
     $engine = new Engine([$tmpDir]);
     $engine->analyze();
-    
+
     $builder = new OpenApiBuilder();
     $config = new OpenApiConfig();
     $spec = $builder->buildFromInfer($engine, $config);
-    
+
     $param = $spec['paths']['/users/{id}']['get']['parameters'][0];
-    
+
     expect($param['name'])->toBe('id');
     expect($param['description'])->toBe('The user ID to retrieve');
-    
+
     unlink($tmpDir . '/UserController.php');
     rmdir($tmpDir);
 });
@@ -165,7 +165,7 @@ class UserController {
 test('Builder extracts response description from docblock', function () {
     $tmpDir = sys_get_temp_dir() . '/lens_test_' . uniqid();
     mkdir($tmpDir, 0777, true);
-    
+
     file_put_contents($tmpDir . '/UserController.php', '<?php
 namespace App\Http\Controllers;
 
@@ -183,18 +183,18 @@ class UserController {
     }
 }
 ');
-    
+
     $engine = new Engine([$tmpDir]);
     $engine->analyze();
-    
+
     $builder = new OpenApiBuilder();
     $config = new OpenApiConfig();
     $spec = $builder->buildFromInfer($engine, $config);
-    
+
     $response = $spec['paths']['/users/{id}']['get']['responses']['200'];
-    
+
     expect($response['description'])->toContain('User data with profile information');
-    
+
     unlink($tmpDir . '/UserController.php');
     rmdir($tmpDir);
 });
@@ -202,7 +202,7 @@ class UserController {
 test('Builder extracts deprecated flag from docblock', function () {
     $tmpDir = sys_get_temp_dir() . '/lens_test_' . uniqid();
     mkdir($tmpDir, 0777, true);
-    
+
     file_put_contents($tmpDir . '/UserController.php', '<?php
 namespace App\Http\Controllers;
 
@@ -220,18 +220,18 @@ class UserController {
     }
 }
 ');
-    
+
     $engine = new Engine([$tmpDir]);
     $engine->analyze();
-    
+
     $builder = new OpenApiBuilder();
     $config = new OpenApiConfig();
     $spec = $builder->buildFromInfer($engine, $config);
-    
+
     $operation = $spec['paths']['/users/old']['get'];
-    
+
     expect($operation['deprecated'])->toBeTrue();
-    
+
     unlink($tmpDir . '/UserController.php');
     rmdir($tmpDir);
 });
@@ -239,7 +239,7 @@ class UserController {
 test('Builder extracts example from docblock', function () {
     $tmpDir = sys_get_temp_dir() . '/lens_test_' . uniqid();
     mkdir($tmpDir, 0777, true);
-    
+
     file_put_contents($tmpDir . '/UserController.php', '<?php
 namespace App\Http\Controllers;
 
@@ -257,18 +257,18 @@ class UserController {
     }
 }
 ');
-    
+
     $engine = new Engine([$tmpDir]);
     $engine->analyze();
-    
+
     $builder = new OpenApiBuilder();
     $config = new OpenApiConfig();
     $spec = $builder->buildFromInfer($engine, $config);
-    
+
     $requestBody = $spec['paths']['/users']['post']['requestBody'];
-    
+
     expect($requestBody['content']['application/json']['example'])->toBe('{"name": "John", "email": "john@example.com"}');
-    
+
     unlink($tmpDir . '/UserController.php');
     rmdir($tmpDir);
 });
@@ -276,7 +276,7 @@ class UserController {
 test('Builder extracts multiple param descriptions', function () {
     $tmpDir = sys_get_temp_dir() . '/lens_test_' . uniqid();
     mkdir($tmpDir, 0777, true);
-    
+
     file_put_contents($tmpDir . '/UserController.php', '<?php
 namespace App\Http\Controllers;
 
@@ -296,20 +296,20 @@ class UserController {
     }
 }
 ');
-    
+
     $engine = new Engine([$tmpDir]);
     $engine->analyze();
-    
+
     $builder = new OpenApiBuilder();
     $config = new OpenApiConfig();
     $spec = $builder->buildFromInfer($engine, $config);
-    
+
     $params = $spec['paths']['/users/search']['get']['parameters'];
-    
+
     expect($params[0]['description'])->toBe('Search query string');
     expect($params[1]['description'])->toBe('Maximum results to return');
     expect($params[2]['description'])->toBe('Pagination offset');
-    
+
     unlink($tmpDir . '/UserController.php');
     rmdir($tmpDir);
 });

@@ -18,9 +18,7 @@ use PhpParser\Node\Param;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Stmt\Namespace_;
-use PhpParser\Node\Stmt\Property;
 use PhpParser\Node\Stmt\Use_;
-use PhpParser\Node\Stmt\UseUse;
 use PhpParser\Node\UnionType as PhpUnionType;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitorAbstract;
@@ -265,7 +263,7 @@ final class Engine
 
                                     // #[Can] attribute for permissions
                                     if ($lname === 'can') {
-                                        if (!isset($meta['permissions'])) {
+                                        if (! isset($meta['permissions'])) {
                                             $meta['permissions'] = [];
                                         }
                                         if (isset($attr->args[0]) && $attr->args[0]->value instanceof Node\Scalar\String_) {
@@ -297,26 +295,27 @@ final class Engine
                             foreach ($stmt->params as $p) {
                                 $pname = is_string($p->var->name) ? $p->var->name : (string) $p->var->name;
                                 $ptype = $this->mapTypeNode($p->type);
-                                
+
                                 // Resolve named object types
                                 if ($ptype instanceof \Lens\Types\NamedObjectType && ! str_contains($ptype->className, '\\')) {
                                     $resolved = $this->resolveName($ptype->className);
                                     $ptype = new \Lens\Types\NamedObjectType($resolved);
                                 }
-                                
+
                                 $params[] = [
                                     'name' => $pname,
                                     'type' => $ptype,
                                 ];
                             }
 
-                            $methods[$methodName] = [
-                                'return' => $returnType,
-                                'params' => $params,
-                                'http' => $http,
-                                'path' => $path,
-                                'throws' => $throws !== [] ? $throws : null,
-                            ] + $meta;
+                            $methods[$methodName] =
+                                [
+                                    'return' => $returnType,
+                                    'params' => $params,
+                                    'http' => $http,
+                                    'path' => $path,
+                                    'throws' => $throws !== [] ? $throws : null,
+                                ] + $meta;
                         }
 
                         $this->collected[$fqcn] = new NamedObjectType($fqcn, ...$props);
@@ -350,23 +349,23 @@ final class Engine
                     private function parseDocblock(string $doc): array
                     {
                         $meta = [];
-                        
+
                         // Remove /** and */ and leading * from each line
                         $lines = explode("\n", $doc);
                         $cleanLines = [];
                         foreach ($lines as $line) {
                             $line = preg_replace('/^\s*\*\s?/', '', trim($line));
-                            if ($line !== '' && $line !== '/' && !str_starts_with($line, '/')) {
+                            if ($line !== '' && $line !== '/' && ! str_starts_with($line, '/')) {
                                 $cleanLines[] = $line;
                             }
                         }
                         $cleanDoc = implode("\n", $cleanLines);
-                        
+
                         // Extract summary (first line before any @tags)
                         if (preg_match('/^([^\n@]+)/', $cleanDoc, $m)) {
                             $meta['summary'] = trim($m[1]);
                         }
-                        
+
                         // Extract description (text between summary and first @tag)
                         if (preg_match('/^[^\n@]+\n+((?:[^\n@][^\n]*\n*)*)(?=@|\z)/', $cleanDoc, $m)) {
                             $desc = trim($m[1]);
@@ -374,12 +373,12 @@ final class Engine
                                 $meta['description'] = $desc;
                             }
                         }
-                        
+
                         // Extract @deprecated
                         if (preg_match('/@deprecated\b/', $cleanDoc)) {
                             $meta['deprecated'] = true;
                         }
-                        
+
                         // Extract @param descriptions
                         if (preg_match_all('/@param\s+(?:\S+\s+)?\$([a-zA-Z_][a-zA-Z0-9_]*)\s+(.+)/', $cleanDoc, $matches, PREG_SET_ORDER)) {
                             $paramDescriptions = [];
@@ -390,22 +389,22 @@ final class Engine
                                 $meta['paramDescriptions'] = $paramDescriptions;
                             }
                         }
-                        
+
                         // Extract @return description
                         if (preg_match('/@return\s+\S+\s+(.+)/', $cleanDoc, $m)) {
                             $meta['returnDescription'] = trim($m[1]);
                         }
-                        
+
                         // Extract @example
                         if (preg_match('/@example\s+(\{.+\})/', $cleanDoc, $m)) {
                             $meta['example'] = $m[1];
                         }
-                        
+
                         // Extract @tag
                         if (preg_match_all('/@tag\s+(\S+)/', $cleanDoc, $matches)) {
                             $meta['tags'] = $matches[1];
                         }
-                        
+
                         return $meta;
                     }
 

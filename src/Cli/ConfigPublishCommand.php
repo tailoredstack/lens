@@ -31,9 +31,9 @@ class ConfigPublishCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $output->writeln('<info>Publishing Lens configuration...</info>');
-        
+
         $this->installer->publishConfig();
-        
+
         return Command::SUCCESS;
     }
 }

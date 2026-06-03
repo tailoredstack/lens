@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace Lens\Extensions\Operation;
 
 use Lens\Infer\Engine;
+use Lens\Types\NamedObjectType;
 use Lens\Types\Type;
 use Lens\Types\VoidType;
-use Lens\Types\NamedObjectType;
-use Lens\Types\PropertyType;
 
 /**
  * Transforms Tempest controller methods into OpenAPI operations.
@@ -23,7 +22,7 @@ final class TempestOperationTransformer implements OperationTransformer
         Type $returnType,
         array $params,
         \Closure $schemaConverter,
-        array $meta = []
+        array $meta = [],
     ): ?array {
         // Skip if void return
         if ($returnType instanceof VoidType) {
@@ -80,12 +79,12 @@ final class TempestOperationTransformer implements OperationTransformer
                     'in' => 'query',
                     'schema' => $schemaConverter($paramType),
                 ];
-                
+
                 // Add description from docblock
                 if (isset($meta['paramDescriptions'][$paramName])) {
                     $paramSchema['description'] = $meta['paramDescriptions'][$paramName];
                 }
-                
+
                 $queryParams[] = $paramSchema;
             } else {
                 // Assume body for complex types
@@ -102,13 +101,13 @@ final class TempestOperationTransformer implements OperationTransformer
                 'type' => 'object',
                 'properties' => $bodyParams,
             ];
-            
+
             // Add required if any
             if (isset($operation['requestBody']['__required']) && $operation['requestBody']['__required'] !== []) {
                 $requestBodySchema['required'] = array_unique($operation['requestBody']['__required']);
                 unset($operation['requestBody']['__required']);
             }
-            
+
             $operation['requestBody'] = [
                 'content' => [
                     'application/json' => [

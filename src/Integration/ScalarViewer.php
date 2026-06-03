@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Lens\Integration;
 
+use Lens\Builder\OpenApiBuilder;
 use Lens\Config\LensConfig;
 use Lens\Config\OpenApiConfig;
 use Lens\Infer\Engine;
-use Lens\Builder\OpenApiBuilder;
 
 /**
  * Scalar OpenAPI viewer integration for Tempest.
- * 
+ *
  * Provides a route to serve the OpenAPI spec with Scalar UI.
  */
 class ScalarViewer
@@ -29,28 +29,28 @@ class ScalarViewer
     public function getHtml(): string
     {
         $specUrl = $this->specUrl ?? $this->specPath;
-        
+
         return <<<HTML
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>{$this->title}</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-      body { margin: 0; padding: 0; }
-    </style>
-  </head>
-  <body>
-    <script
-      id="api-reference"
-      data-url="{$specUrl}"
-      data-proxy-url="https://proxy.scalar.com">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
-  </body>
-</html>
-HTML;
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>{$this->title}</title>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <style>
+              body { margin: 0; padding: 0; }
+            </style>
+          </head>
+          <body>
+            <script
+              id="api-reference"
+              data-url="{$specUrl}"
+              data-proxy-url="https://proxy.scalar.com">
+            </script>
+            <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+          </body>
+        </html>
+        HTML;
     }
 
     /**
@@ -76,7 +76,7 @@ HTML;
     {
         $engine = new Engine($sources);
         $builder = new OpenApiBuilder();
-        
+
         return $builder->buildFromInfer($engine, $config);
     }
 

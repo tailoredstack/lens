@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace Lens;
 
 use Tempest\Core\Kernel;
+
 use function Tempest\app_path;
 use function Tempest\root_path;
 
 /**
  * Lens configuration loader.
- * 
+ *
  * Loads lens.config.php from app/ or root directory.
  */
 final class LensConfigLoader
@@ -28,12 +29,12 @@ final class LensConfigLoader
             $configPath = __DIR__ . '/../config/lens.config.php';
         }
 
-        if (!file_exists($configPath)) {
+        if (! file_exists($configPath)) {
             return;
         }
 
         $config = require $configPath;
-        
+
         // Store in config registry
         config()->set('lens', $config);
     }

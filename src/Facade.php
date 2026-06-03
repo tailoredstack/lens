@@ -6,7 +6,6 @@ namespace Lens;
 
 use Lens\Builder\OpenApiBuilder;
 use Lens\Config\OpenApiConfig;
-use Lens\Discovery\OpenApiDiscovery;
 use Lens\Extensions\Exception\ExceptionToResponseExtension;
 use Lens\Extensions\Operation\OperationTransformer;
 use Lens\Extensions\TypeToSchema\TypeToSchemaExtension;
