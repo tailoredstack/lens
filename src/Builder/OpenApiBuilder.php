@@ -32,6 +32,18 @@ final class OpenApiBuilder
         $types = $engine->getTypes();
         $operations = $engine->getOperations();
 
+        // Initialize extensions from config
+        if ($config !== null && $config->extensions !== []) {
+            foreach ($config->extensions as $extClass) {
+                if (class_exists($extClass)) {
+                    $ext = new $extClass();
+                    if ($ext instanceof TypeToSchemaExtension) {
+                        $this->addTypeToSchemaExtension($ext);
+                    }
+                }
+            }
+        }
+
         $schemas = [];
 
         foreach ($types as $fqcn => $type) {
@@ -50,6 +62,16 @@ final class OpenApiBuilder
         $title = $config->title ?? 'Lens OpenAPI';
         $version = $config->version ?? '0.0.0';
         $basePath = $config->basePath ?? '/';
+        $apiDomain = $config->apiDomain ?? null;
+
+        // Build servers
+        $servers = $config->servers ?? null;
+        if ($servers === null) {
+            $serverUrl = $apiDomain !== null
+                ? rtrim($apiDomain, '/') . $basePath
+                : $basePath;
+            $servers = [['url' => $serverUrl]];
+        }
 
         return [
             'openapi' => '3.1.0',
@@ -57,9 +79,7 @@ final class OpenApiBuilder
                 'title' => $title,
                 'version' => $version,
             ],
-            'servers' => [
-                ['url' => $basePath],
-            ],
+            'servers' => $servers,
             'paths' => $this->buildPaths($operations, $config),
             'components' => [
                 'schemas' => $schemas,
