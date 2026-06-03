@@ -53,12 +53,12 @@ test('DefaultValidationRuleToConstraint does not support unknown rules', functio
 
 test('DefaultValidationRuleToConstraint returns empty array for unsupported rules', function () {
     $extension = new DefaultValidationRuleToConstraint();
-    
+
     // Create a mock rule object
     $rule = new class {
         public string $name = 'test';
     };
-    
+
     // Should return empty array for unsupported rule
     $result = $extension->convert($rule);
     expect($result)->toBe([]);

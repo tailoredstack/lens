@@ -13,10 +13,10 @@ interface ValidationRuleToConstraint
      * Check if this extension supports the given validation rule class.
      */
     public function supports(string $ruleClass): bool;
-    
+
     /**
      * Convert the validation rule to OpenAPI schema constraints.
-     * 
+     *
      * @return array{
      *     minLength?: int,
      *     maxLength?: int,

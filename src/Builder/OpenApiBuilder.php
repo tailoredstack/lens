@@ -121,12 +121,14 @@ final class OpenApiBuilder
                 : strtolower($shortName);
 
             foreach ($methods as $name => $meta) {
+                $methodName = is_string($name) ? $name : (string) $name;
+                
                 // skip internal methods unless configured otherwise
-                if (! $includeInternal && str_starts_with($name, '__')) {
+                if (! $includeInternal && str_starts_with($methodName, '__')) {
                     continue;
                 }
 
-                $http = $meta['http'] ?? 'get';
+                $http = (string) ($meta['http'] ?? 'get');
                 $path = $meta['path'] ?? null;
 
                 // Generate path from controller/method if not specified
@@ -135,18 +137,18 @@ final class OpenApiBuilder
                         // UserController + index → GET /users
                         // UserController + show → GET /users/{id}
                         $path = '/' . $controllerBase;
-                        
+
                         // Add resource ID for show/update/delete methods
-                        if (in_array($name, ['show', 'update', 'patch', 'delete', 'destroy'])) {
+                        if (in_array($methodName, ['show', 'update', 'patch', 'delete', 'destroy'])) {
                             $path .= '/{id}';
                         }
-                        
+
                         // For methods that aren't standard REST, append method name
-                        if (! in_array($name, ['index', 'show', 'store', 'update', 'patch', 'delete', 'destroy'])) {
-                            $path .= '/' . $name;
+                        if (! in_array($methodName, ['index', 'show', 'store', 'update', 'patch', 'delete', 'destroy'])) {
+                            $path .= '/' . $methodName;
                         }
                     } else {
-                        $path = '/' . str_replace('\\', '/', strtolower($fqcn)) . '/' . $name;
+                        $path = '/' . str_replace('\\', '/', strtolower($fqcn)) . '/' . $methodName;
                     }
                 }
 
@@ -167,11 +169,11 @@ final class OpenApiBuilder
                 $params = [];
                 foreach ($meta['params'] as $p) {
                     $paramType = $p['type'];
-                    $paramName = $p['name'];
-                    
+                    $paramName = is_string($p['name']) ? $p['name'] : (string) $p['name'];
+
                     // Check if param should be path parameter
                     $isPathParam = str_contains($path, '{' . $paramName . '}');
-                    
+
                     $params[] = [
                         'name' => $paramName,
                         'in' => $isPathParam ? 'path' : 'query',
@@ -181,8 +183,8 @@ final class OpenApiBuilder
                 }
 
                 $operation = [
-                    'operationId' => $fqcn . '::' . $name,
-                    'summary' => $this->generateSummary($controllerBase, $name),
+                    'operationId' => $fqcn . '::' . $methodName,
+                    'summary' => $this->generateSummary($controllerBase, $methodName),
                     'responses' => $responses,
                 ];
 
@@ -215,7 +217,10 @@ final class OpenApiBuilder
 
         // Convert method name to human-readable
         $words = preg_split('/(?=[A-Z])/', $method);
-        $words = array_filter($words, fn($w) => $w !== '');
+        if ($words === false) {
+            $words = [$method];
+        }
+        $words = array_filter($words, static fn ($w) => $w !== '');
         return ucfirst(strtolower(implode(' ', $words)));
     }
 
@@ -245,7 +250,7 @@ final class OpenApiBuilder
         return $schema;
     }
 
-    private function schemaFromType($type): array
+    private function schemaFromType(\Lens\Types\Type $type): array
     {
         foreach ($this->typeToSchemaExtensions as $ext) {
             if ($ext->supports($type)) {

@@ -12,5 +12,6 @@ use Lens\Types\Type;
 interface RequestToParametersExtension
 {
     public function supports(string $requestClass): bool;
+
     public function convert(string $requestClass): array;
 }

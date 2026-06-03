@@ -25,7 +25,7 @@ test('OpenApiConfig custom values', function () {
     $config = new OpenApiConfig(
         title: 'Test',
         version: '1.0.0',
-        basePath: '/api'
+        basePath: '/api',
     );
     expect($config->title)->toBe('Test');
     expect($config->version)->toBe('1.0.0');

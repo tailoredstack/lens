@@ -23,14 +23,14 @@ final class DefaultValidationRuleToConstraint implements ValidationRuleToConstra
             'Tempest\Validation\Rules\Enum',
             'Tempest\Validation\Rules\Between',
         ];
-        
+
         return in_array($ruleClass, $supported, true);
     }
 
     public function convert(object $rule): array
     {
         $ruleClass = get_class($rule);
-        
+
         return match ($ruleClass) {
             'Tempest\Validation\Rules\MinLength' => [
                 'minLength' => $rule->length ?? $rule->min ?? 0,
@@ -60,17 +60,17 @@ final class DefaultValidationRuleToConstraint implements ValidationRuleToConstra
             default => [],
         };
     }
-    
+
     private function getEnumValues(object $rule): array
     {
         // Try to extract enum values from the rule
         if (isset($rule->enum)) {
             $enumClass = $rule->enum;
             if (is_string($enumClass) && enum_exists($enumClass)) {
-                return array_map(fn($case) => $case->value ?? $case->name, $enumClass::cases());
+                return array_map(fn ($case) => $case->value ?? $case->name, $enumClass::cases());
             }
         }
-        
+
         return [];
     }
 }
