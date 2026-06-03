@@ -25,6 +25,10 @@ final class DefaultTypeToSchema implements TypeToSchemaExtension
         return true; // Handles all types with fallback
     }
 
+    /**
+     * @param Type $type
+     * @return array{type?: string, items?: array, nullable?: bool, enum?: array, '$ref'?: string, properties?: array, oneOf?: array}
+     */
     public function convert(Type $type): array
     {
         if ($type instanceof Nullable) {
@@ -77,7 +81,7 @@ final class DefaultTypeToSchema implements TypeToSchemaExtension
         }
 
         if ($type instanceof UnionType) {
-            $schemas = array_map(fn ($t) => $this->convert($t), $type->types);
+            $schemas = array_map($this->convert(...), $type->types);
             return ['oneOf' => $schemas];
         }
 
@@ -85,6 +89,10 @@ final class DefaultTypeToSchema implements TypeToSchemaExtension
         return [];
     }
 
+    /**
+     * @param string $name
+     * @return array{type: string}
+     */
     private function scalarToSchema(string $name): array
     {
         $map = [

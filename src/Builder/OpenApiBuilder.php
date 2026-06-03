@@ -291,12 +291,15 @@ final class OpenApiBuilder
                 // Process #[Throws] attributes and add exception responses
                 $throwsAttr = $meta['throws'] ?? null;
                 if ($throwsAttr !== null) {
+                    /** @var array|string $exceptionClasses */
                     $exceptionClasses = is_array($throwsAttr) ? $throwsAttr : [$throwsAttr];
                     foreach ($exceptionClasses as $exceptionClass) {
+                        /** @var string $exceptionClass */
                         foreach ($this->exceptionToResponseExtensions as $ext) {
                             if ($ext->supports($exceptionClass)) {
                                 $exceptionResponses = $ext->convert($exceptionClass);
                                 foreach ($exceptionResponses as $statusCode => $responseSpec) {
+                                    /** @var array $operation */
                                     $operation['responses'][$statusCode] = $responseSpec;
                                 }
                             }
@@ -310,6 +313,7 @@ final class OpenApiBuilder
                     $operation['security'] = [];
                 } elseif (isset($meta['auth'])) {
                     // Add security requirement based on guard
+                    /** @var string $guard */
                     $guard = $meta['auth'];
                     $securityScheme = $guard === 'default' ? 'bearerAuth' : $guard . 'Auth';
                     $operation['security'] = [[$securityScheme => []]];
@@ -327,6 +331,11 @@ final class OpenApiBuilder
         return $paths;
     }
 
+    /**
+     * @param string $resource
+     * @param string $method
+     * @return string
+     */
     private function generateSummary(string $resource, string $method): string
     {
         $summaries = [
@@ -344,14 +353,19 @@ final class OpenApiBuilder
         }
 
         // Convert method name to human-readable
+        /** @var array<string> $words */
         $words = preg_split('/(?=[A-Z])/', $method);
         if ($words === false) {
             $words = [$method];
         }
-        $words = array_filter($words, static fn ($w) => $w !== '');
+        $words = array_filter($words, static fn (string $w): bool => $w !== '');
         return ucfirst(strtolower(implode(' ', $words)));
     }
 
+    /**
+     * @param NamedObjectType $obj
+     * @return array{type: string, properties: array, required?: array}
+     */
     private function schemaFromNamedObject(NamedObjectType $obj): array
     {
         $props = [];
@@ -378,6 +392,10 @@ final class OpenApiBuilder
         return $schema;
     }
 
+    /**
+     * @param \Lens\Types\Type $type
+     * @return array
+     */
     private function schemaFromType(\Lens\Types\Type $type): array
     {
         foreach ($this->typeToSchemaExtensions as $ext) {

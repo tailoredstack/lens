@@ -94,6 +94,10 @@ final class Engine
                         $this->operations = &$operations;
                     }
 
+                    /**
+                     * @param Node $node
+                     * @return int|Node|array<array-key, Node>|null
+                     */
                     public function enterNode(Node $node)
                     {
                         if ($node instanceof Namespace_) {
@@ -346,6 +350,10 @@ final class Engine
                         return $name;
                     }
 
+                    /**
+                     * @param string $doc
+                     * @return array<string, mixed>
+                     */
                     private function parseDocblock(string $doc): array
                     {
                         $meta = [];
@@ -408,6 +416,10 @@ final class Engine
                         return $meta;
                     }
 
+                    /**
+                     * @param string $doc
+                     * @return ?Type
+                     */
                     private function mapDocVar(string $doc)
                     {
                         if (! preg_match('/@var\s+([^\s\|]+)/', $doc, $m)) {
@@ -419,13 +431,17 @@ final class Engine
                         // union in docblock
                         if (str_contains($typeStr, '|')) {
                             $parts = explode('|', $typeStr);
-                            $mapped = array_map(fn ($p) => $this->mapSimpleStringType(trim($p)), $parts);
+                            $mapped = array_map($this->mapSimpleStringType(...), $parts);
                             return new UnionType(...$mapped);
                         }
 
                         return $this->mapSimpleStringType($typeStr);
                     }
 
+                    /**
+                     * @param string $s
+                     * @return Type
+                     */
                     private function mapSimpleStringType(string $s)
                     {
                         // array like string[]
@@ -461,6 +477,10 @@ final class Engine
                         return new NamedObjectType($resolved);
                     }
 
+                    /**
+                     * @param ?Node $node
+                     * @return Type
+                     */
                     private function mapTypeNode(?Node $node)
                     {
                         if ($node === null) {
@@ -472,12 +492,12 @@ final class Engine
                         }
 
                         if ($node instanceof PhpUnionType) {
-                            $types = array_map(fn ($t) => $this->mapTypeNode($t), $node->types);
+                            $types = array_map($this->mapTypeNode(...), $node->types);
                             return new UnionType(...$types);
                         }
 
                         if ($node instanceof PhpIntersectionType) {
-                            $types = array_map(fn ($t) => $this->mapTypeNode($t), $node->types);
+                            $types = array_map($this->mapTypeNode(...), $node->types);
                             return new IntersectionType(...$types);
                         }
 
@@ -525,6 +545,7 @@ final class Engine
     {
         $stack = [];
 
+        /** @var \Closure(Node&, ?Node): void $visitor */
         $visitor = function (&$node, $parent = null) use (&$visitor, &$stack) {
             if (! $node instanceof Node) {
                 return;

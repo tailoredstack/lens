@@ -15,6 +15,16 @@ use Lens\Types\VoidType;
  */
 final class TempestOperationTransformer implements OperationTransformer
 {
+    /**
+     * @param Engine $engine
+     * @param string $controllerClass
+     * @param string $method
+     * @param Type $returnType
+     * @param array<int, array{name: string, type: Type}> $params
+     * @param \Closure(Type): array $schemaConverter
+     * @param array $meta
+     * @return array{operationId: string, summary: string, responses: array, parameters?: array, requestBody?: array}|null
+     */
     public function transform(
         Engine $engine,
         string $controllerClass,

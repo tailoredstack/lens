@@ -10,6 +10,9 @@ namespace Lens\Extensions\Validation;
  */
 final class DefaultValidationRuleToConstraint implements ValidationRuleToConstraint
 {
+    /**
+     * @param string $ruleClass
+     */
     public function supports(string $ruleClass): bool
     {
         // Support common Tempest validation rules
@@ -27,8 +30,22 @@ final class DefaultValidationRuleToConstraint implements ValidationRuleToConstra
         return in_array($ruleClass, $supported, true);
     }
 
+    /**
+     * @param object $rule
+     * @return array{
+     *     minLength?: int,
+     *     maxLength?: int,
+     *     pattern?: string,
+     *     minimum?: int|float,
+     *     maximum?: int|float,
+     *     format?: string,
+     *     enum?: array,
+     *     ...
+     * }
+     */
     public function convert(object $rule): array
     {
+        /** @var class-string $ruleClass */
         $ruleClass = get_class($rule);
 
         return match ($ruleClass) {
@@ -61,13 +78,17 @@ final class DefaultValidationRuleToConstraint implements ValidationRuleToConstra
         };
     }
 
+    /**
+     * @param object $rule
+     * @return array
+     */
     private function getEnumValues(object $rule): array
     {
         // Try to extract enum values from the rule
         if (isset($rule->enum)) {
             $enumClass = $rule->enum;
             if (is_string($enumClass) && enum_exists($enumClass)) {
-                return array_map(fn ($case) => $case->value ?? $case->name, $enumClass::cases());
+                return array_map(static fn ($case) => $case->value ?? $case->name, $enumClass::cases());
             }
         }
 

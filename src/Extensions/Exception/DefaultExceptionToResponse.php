@@ -9,6 +9,7 @@ namespace Lens\Extensions\Exception;
  */
 class DefaultExceptionToResponse implements ExceptionToResponse
 {
+    /** @var array<string, array{status: int, description: string, content?: array}> */
     private const EXCEPTION_MAP = [
         'Tempest\Http\Exceptions\NotFoundException' => [
             'status' => 404,
@@ -53,15 +54,21 @@ class DefaultExceptionToResponse implements ExceptionToResponse
         return isset(self::EXCEPTION_MAP[$exceptionClass]);
     }
 
+    /**
+     * @param string $exceptionClass
+     * @return array<string, array{description: string, content?: array}>
+     */
     public function convert(string $exceptionClass): array
     {
         if (! isset(self::EXCEPTION_MAP[$exceptionClass])) {
             return [];
         }
 
+        /** @var array{status: int, description: string, content?: array} $mapping */
         $mapping = self::EXCEPTION_MAP[$exceptionClass];
         $status = (string) $mapping['status'];
 
+        /** @var array{description: string, content?: array} $response */
         $response = [
             'description' => $mapping['description'],
         ];
