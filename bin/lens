@@ -1,0 +1,19 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+// Find autoload
+foreach ([__DIR__ . '/../../../autoload.php', __DIR__ . '/../vendor/autoload.php', __DIR__ . '/vendor/autoload.php'] as $file) {
+    if (file_exists($file)) {
+        require $file;
+        break;
+    }
+}
+
+use Lens\Cli\GenerateCommand;
+use Symfony\Component\Console\Application;
+
+$application = new Application('Lens', '0.1.0');
+$application->add(new GenerateCommand());
+$application->run();
