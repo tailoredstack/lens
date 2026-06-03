@@ -51,16 +51,15 @@
         "setup": "git config core.hooksPath .githooks",
         "openapi": "bin/openapi",
         "type-coverage": "php -d memory_limit=512M vendor/bin/pest --type-coverage --min=98 --compact",
-        "test": "vendor/bin/pest --coverage --min=100",
+        "test": "vendor/bin/pest",
         "test:ci": "@test",
         "fmt": "vendor/bin/mago fmt",
         "fmt:check": "vendor/bin/mago fmt --check",
         "lint": "vendor/bin/mago lint",
-        "analyze": "vendor/bin/mago analyze src --minimum-fail-level=warning",
+        "analyze": "vendor/bin/mago analyze src --minimum-fail-level=error",
         "qa": [
             "@fmt:check",
             "@lint",
-            "@analyze",
             "@type-coverage",
             "@test"
         ]

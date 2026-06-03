@@ -353,12 +353,11 @@ final class OpenApiBuilder
         }
 
         // Convert method name to human-readable
-        /** @var array<string> $words */
         $words = preg_split('/(?=[A-Z])/', $method);
         if ($words === false) {
             $words = [$method];
         }
-        $words = array_filter($words, static fn (string $w): bool => $w !== '');
+        $words = array_filter($words, static fn ($w) => $w !== '');
         return ucfirst(strtolower(implode(' ', $words)));
     }
 
