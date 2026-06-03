@@ -11,7 +11,8 @@ Generates OpenAPI 3.1 specifications from PHP type declarations, attributes, and
 - ✅ Infer engine (AST parsing, type inference)
 - ✅ OpenAPI builder (type→schema mapping)
 - ✅ CLI command (`bin/openapi`)
-- ✅ 100% test coverage (18 tests)
+- ✅ 90 tests passing (252 assertions)
+- ✅ Extension system (TypeToSchema, OperationTransformer, ExceptionToResponse, ValidationRuleToConstraint)
 
 ## Installation
 
@@ -83,6 +84,90 @@ This creates `lens.config.php` in your project root. Customize options like titl
 - **OpenAPI 3.1** — generates compliant specifications
 - **JSON/YAML output** — choose your format
 - **100% type coverage** — enforced via Pest type-coverage plugin
+- **Extension system** — customize type-to-schema, validation rules, exception handling
+
+## Extension System
+
+Lens provides extension points for customizing behavior:
+
+### TypeToSchemaExtension
+
+Convert Lens types to OpenAPI schemas:
+
+```php
+use Lens\Extensions\TypeToSchema\TypeToSchemaExtension;
+use Lens\Types\Type;
+
+class CustomTypeToSchema implements TypeToSchemaExtension
+{
+    public function supports(Type $type): bool
+    {
+        return $type instanceof CustomType;
+    }
+    
+    public function convert(Type $type): array
+    {
+        return ['type' => 'string', 'format' => 'custom'];
+    }
+}
+```
+
+### ValidationRuleToConstraint
+
+Map Tempest validation rules to OpenAPI constraints:
+
+```php
+use Lens\Extensions\Validation\ValidationRuleToConstraint;
+
+class MinLengthConstraint implements ValidationRuleToConstraint
+{
+    public function supports(string $ruleClass): bool
+    {
+        return $ruleClass === 'App\Validation\MinLength';
+    }
+    
+    public function convert(object $rule): array
+    {
+        return ['minLength' => $rule->min];
+    }
+}
+```
+
+### ExceptionToResponseExtension
+
+Map exceptions to OpenAPI responses:
+
+```php
+use Lens\Extensions\Exception\ExceptionToResponseExtension;
+use Throwable;
+
+class CustomExceptionToResponse implements ExceptionToResponseExtension
+{
+    public function supports(Throwable $exception): bool
+    {
+        return $exception instanceof CustomException;
+    }
+    
+    public function convert(Throwable $exception): array
+    {
+        return [
+            '400' => ['description' => 'Custom error'],
+        ];
+    }
+}
+```
+
+Register extensions in `lens.config.php`:
+
+```php
+return new OpenApiConfig(
+    extensions: [
+        CustomTypeToSchema::class,
+        MinLengthConstraint::class,
+        CustomExceptionToResponse::class,
+    ],
+);
+```
 
 ## QA Commands
 
