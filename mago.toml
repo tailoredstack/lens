@@ -44,7 +44,7 @@ no-else-clause = { enabled = false }
 no-boolean-flag-parameter = { enabled = false }
 no-shorthand-ternary = { enabled = false }
 no-assign-in-condition = { enabled = false }
-strict-types = { enabled = false }
+strict-types = { enabled = true }
 tagged-todo = { enabled = false }
 excessive-parameter-list = { enabled = false }
 halstead = { enabled = false }

@@ -39,6 +39,19 @@
             "can-discover": true
         }
     },
+    "scripts": {
+        "type-coverage": "php bin/type-coverage.php",
+        "test": "vendor/bin/pest --coverage --min=100",
+        "fmt": "vendor/bin/mago fmt",
+        "fmt:check": "vendor/bin/mago fmt --check",
+        "lint": "vendor/bin/mago lint",
+        "qa": [
+            "@fmt:check",
+            "@lint",
+            "@type-coverage",
+            "@test"
+        ]
+    },
     "config": {
         "sort-packages": true
     },
