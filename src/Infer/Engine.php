@@ -213,24 +213,25 @@ final class Engine
                                 foreach ($ag->attrs as $attr) {
                                     $an = $attr->name->toString();
                                     $lname = strtolower($an);
-                                    if (in_array($lname, ['get','post','put','patch','delete','route'], true)) {
-                                        if ($lname === 'route') {
-                                            // route(attr args: METHOD, PATH) or (PATH)
-                                            $args = $attr->args;
-                                            if (isset($args[0]) && $args[0]->value instanceof Node\Scalar\String_) {
-                                                $path = $args[0]->value->value;
-                                            }
-                                            if (isset($args[1]) && $args[1]->value instanceof Node\Scalar\String_) {
-                                                $http = strtolower($args[0]->value->value);
-                                                $path = $args[1]->value->value;
-                                            }
-                                        } else {
-                                            $http = $lname;
-                                            // first arg can be path
-                                            $args = $attr->args;
-                                            if (isset($args[0]) && $args[0]->value instanceof Node\Scalar\String_) {
-                                                $path = $args[0]->value->value;
-                                            }
+
+                                    // Tempest attributes: #[Get], #[Post], #[Put], #[Patch], #[Delete]
+                                    if (in_array($lname, ['get','post','put','patch','delete'], true)) {
+                                        $http = $lname;
+                                        $args = $attr->args;
+                                        if (isset($args[0]) && $args[0]->value instanceof Node\Scalar\String_) {
+                                            $path = $args[0]->value->value;
+                                        }
+                                    }
+
+                                    // Generic #[Route] attribute
+                                    if ($lname === 'route') {
+                                        $args = $attr->args;
+                                        if (isset($args[0]) && $args[0]->value instanceof Node\Scalar\String_) {
+                                            $path = $args[0]->value->value;
+                                        }
+                                        if (isset($args[1]) && $args[1]->value instanceof Node\Scalar\String_) {
+                                            $http = strtolower($args[0]->value->value);
+                                            $path = $args[1]->value->value;
                                         }
                                     }
                                 }
