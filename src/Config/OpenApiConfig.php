@@ -15,6 +15,8 @@ final readonly class OpenApiConfig
         public string $version = '0.0.0',
         public string $basePath = '/',
         public array $exclude = [],
+        public bool $includeInternal = false,
+        public string $outputFormat = 'json',
     ) {
         $this->sources = $sources;
     }

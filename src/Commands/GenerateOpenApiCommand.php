@@ -16,12 +16,17 @@ final class GenerateOpenApiCommand
         ?string $title = null,
         ?string $version = null,
         ?string $basePath = null,
+        array $exclude = [],
+        bool $includeInternal = false,
     ): int {
         $config = new OpenApiConfig(
             sources: [],
             title: $title ?? 'Lens OpenAPI',
             version: $version ?? '0.0.0',
             basePath: $basePath ?? '/',
+            exclude: $exclude,
+            includeInternal: $includeInternal,
+            outputFormat: $format,
         );
 
         $spec = OpenApi::generate($config);

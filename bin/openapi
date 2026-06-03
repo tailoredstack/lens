@@ -19,6 +19,8 @@ $format = 'json';
 $title = null;
 $version = null;
 $basePath = null;
+$exclude = [];
+$includeInternal = false;
 
 while ($arg = array_shift($args)) {
     match ($arg) {
@@ -27,16 +29,20 @@ while ($arg = array_shift($args)) {
         '--title' => $title = array_shift($args),
         '--version' => $version = array_shift($args),
         '--base-path' => $basePath = array_shift($args),
+        '--exclude' => $exclude[] = array_shift($args),
+        '--include-internal' => $includeInternal = true,
         '-h', '--help' => print <<<HELP
 Usage: bin/openapi [options]
 
 Options:
-  -o, --output FILE    Output file (default: stdout, use '-' for stdout)
-  -f, --format FORMAT  Output format: json or yaml (default: json)
-  --title TITLE        OpenAPI title
-  --version VERSION    OpenAPI version
-  --base-path PATH     Base path for servers
-  -h, --help           Show this help
+  -o, --output FILE     Output file (default: stdout, use '-' for stdout)
+  -f, --format FORMAT   Output format: json or yaml (default: json)
+  --title TITLE         OpenAPI title
+  --version VERSION     OpenAPI version
+  --base-path PATH      Base path for servers
+  --exclude PATTERN     Exclude namespace pattern (can be repeated)
+  --include-internal    Include __magic methods in output
+  -h, --help            Show this help
 
 HELP
         ,
@@ -45,4 +51,4 @@ HELP
 }
 
 $cmd = new GenerateOpenApiCommand();
-exit($cmd($output, $format, $title, $version, $basePath));
+exit($cmd($output, $format, $title, $version, $basePath, $exclude, $includeInternal));

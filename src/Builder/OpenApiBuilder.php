@@ -35,11 +35,17 @@ final class OpenApiBuilder
                 continue;
             }
 
+            // skip excluded namespaces
+            if ($this->isExcluded($fqcn, $config)) {
+                continue;
+            }
+
             $schemas[$fqcn] = $this->schemaFromNamedObject($type);
         }
 
         $title = $config->title ?? 'Lens OpenAPI';
         $version = $config->version ?? '0.0.0';
+        $basePath = $config->basePath ?? '/';
 
         return [
             'openapi' => '3.1.0',
@@ -48,21 +54,47 @@ final class OpenApiBuilder
                 'version' => $version,
             ],
             'servers' => [
-                ['url' => $config->basePath ?? '/'],
+                ['url' => $basePath],
             ],
-            'paths' => $this->buildPaths($operations, $types),
+            'paths' => $this->buildPaths($operations, $config),
             'components' => [
                 'schemas' => $schemas,
             ],
         ];
     }
 
-    private function buildPaths(array $operations, array $types): array
+    private function isExcluded(string $fqcn, ?OpenApiConfig $config): bool
+    {
+        if ($config === null) {
+            return false;
+        }
+
+        foreach ($config->exclude as $pattern) {
+            if (str_contains($fqcn, $pattern)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function buildPaths(array $operations, ?OpenApiConfig $config): array
     {
         $paths = [];
+        $includeInternal = $config->includeInternal ?? false;
 
         foreach ($operations as $fqcn => $methods) {
+            // skip excluded namespaces
+            if ($this->isExcluded($fqcn, $config)) {
+                continue;
+            }
+
             foreach ($methods as $name => $meta) {
+                // skip internal methods unless configured otherwise
+                if (! $includeInternal && str_starts_with($name, '__')) {
+                    continue;
+                }
+
                 $http = $meta['http'] ?? null;
                 $path = $meta['path'] ?? null;
 
