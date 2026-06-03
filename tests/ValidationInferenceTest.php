@@ -164,7 +164,7 @@ class FilterController {
 test('Builder adds schema for array body parameter', function () {
     $tmpDir = sys_get_temp_dir() . '/lens_test_' . uniqid();
     mkdir($tmpDir, 0777, true);
-
+    
     file_put_contents($tmpDir . '/UserController.php', '<?php
 namespace App\Http\Controllers;
 use Tempest\Http\Post;
@@ -176,18 +176,19 @@ class UserController {
     }
 }
 ');
-
+    
     $engine = new Engine([$tmpDir]);
     $engine->analyze();
-
+    
     $builder = new OpenApiBuilder();
     $config = new OpenApiConfig();
     $spec = $builder->buildFromInfer($engine, $config);
-
-    $params = $spec['paths']['/users']['post']['parameters'];
-
-    expect($params[0]['schema']['type'])->toBe('array');
-
+    
+    $requestBody = $spec['paths']['/users']['post']['requestBody'];
+    
+    expect($requestBody['content']['application/json']['schema']['type'])->toBe('object');
+    expect($requestBody['content']['application/json']['schema']['properties']['data']['type'])->toBe('array');
+    
     unlink($tmpDir . '/UserController.php');
     rmdir($tmpDir);
 });

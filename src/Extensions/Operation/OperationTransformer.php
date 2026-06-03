@@ -12,5 +12,16 @@ use Lens\Types\Type;
  */
 interface OperationTransformer
 {
-    public function transform(Engine $engine, string $controllerClass, string $method, Type $returnType, array $params): ?array;
+    /**
+     * @param array<array{name: string, type: Type}> $params
+     * @param \Closure(Type): array $schemaConverter
+     */
+    public function transform(
+        Engine $engine,
+        string $controllerClass,
+        string $method,
+        Type $returnType,
+        array $params,
+        \Closure $schemaConverter
+    ): ?array;
 }

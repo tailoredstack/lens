@@ -14,12 +14,21 @@ use Lens\Types\VoidType;
  */
 final class TempestOperationTransformer implements OperationTransformer
 {
-    public function transform(Engine $engine, string $controllerClass, string $method, Type $returnType, array $params): ?array
-    {
+    public function transform(
+        Engine $engine,
+        string $controllerClass,
+        string $method,
+        Type $returnType,
+        array $params,
+        \Closure $schemaConverter
+    ): ?array {
         // Skip if void return
         if ($returnType instanceof VoidType) {
             return null;
         }
+
+        // Convert return type to schema
+        $responseSchema = $schemaConverter($returnType);
 
         // Build operation from inferred data
         $operation = [
@@ -30,7 +39,7 @@ final class TempestOperationTransformer implements OperationTransformer
                     'description' => 'Successful response',
                     'content' => [
                         'application/json' => [
-                            'schema' => [], // Will be filled by TypeToSchema
+                            'schema' => $responseSchema,
                         ],
                     ],
                 ],
@@ -51,11 +60,11 @@ final class TempestOperationTransformer implements OperationTransformer
                 $queryParams[] = [
                     'name' => $paramName,
                     'in' => 'query',
-                    'schema' => [], // Will be filled by TypeToSchema
+                    'schema' => $schemaConverter($paramType),
                 ];
             } else {
                 // Assume body for complex types
-                $bodyParams[$paramName] = []; // Will be filled by TypeToSchema
+                $bodyParams[$paramName] = $schemaConverter($paramType);
             }
         }
 
@@ -83,7 +92,10 @@ final class TempestOperationTransformer implements OperationTransformer
     {
         // Convert method name to human-readable summary
         $words = preg_split('/(?=[A-Z])/', $method);
-        $words = array_filter($words, fn ($w) => $w !== '');
+        if ($words === false) {
+            $words = [$method];
+        }
+        $words = array_filter($words, static fn ($w) => $w !== '');
         return ucfirst(strtolower(implode(' ', $words)));
     }
 

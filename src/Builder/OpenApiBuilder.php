@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Lens\Builder;
 
 use Lens\Config\OpenApiConfig;
+use Lens\Extensions\Operation\OperationTransformer;
+use Lens\Extensions\Operation\TempestOperationTransformer;
 use Lens\Extensions\TypeToSchema\DefaultTypeToSchema;
 use Lens\Extensions\TypeToSchema\TypeToSchemaExtension;
 use Lens\Infer\Engine;
@@ -16,14 +18,23 @@ final class OpenApiBuilder
     /** @var TypeToSchemaExtension[] */
     private array $typeToSchemaExtensions = [];
 
+    /** @var OperationTransformer[] */
+    private array $operationTransformers = [];
+
     public function __construct()
     {
         $this->typeToSchemaExtensions[] = new DefaultTypeToSchema();
+        $this->operationTransformers[] = new TempestOperationTransformer();
     }
 
     public function addTypeToSchemaExtension(TypeToSchemaExtension $extension): void
     {
         array_unshift($this->typeToSchemaExtensions, $extension);
+    }
+
+    public function addOperationTransformer(OperationTransformer $transformer): void
+    {
+        array_unshift($this->operationTransformers, $transformer);
     }
 
     public function buildFromInfer(Engine $engine, ?OpenApiConfig $config = null): array
@@ -80,7 +91,7 @@ final class OpenApiBuilder
                 'version' => $version,
             ],
             'servers' => $servers,
-            'paths' => $this->buildPaths($operations, $config),
+            'paths' => $this->buildPaths($operations, $config, $engine),
             'components' => [
                 'schemas' => $schemas,
             ],
@@ -102,7 +113,7 @@ final class OpenApiBuilder
         return false;
     }
 
-    private function buildPaths(array $operations, ?OpenApiConfig $config): array
+    private function buildPaths(array $operations, ?OpenApiConfig $config, Engine $engine): array
     {
         $paths = [];
         $includeInternal = $config->includeInternal ?? false;
@@ -154,42 +165,63 @@ final class OpenApiBuilder
 
                 $verb = strtolower($http);
 
-                $responses = [
-                    '200' => [
-                        'description' => 'OK',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => $this->schemaFromType($meta['return']),
-                            ],
-                        ],
-                    ],
-                ];
-
-                // Build parameters
-                $params = [];
-                foreach ($meta['params'] as $p) {
-                    $paramType = $p['type'];
-                    $paramName = is_string($p['name']) ? $p['name'] : (string) $p['name'];
-
-                    // Check if param should be path parameter
-                    $isPathParam = str_contains($path, '{' . $paramName . '}');
-
-                    $params[] = [
-                        'name' => $paramName,
-                        'in' => $isPathParam ? 'path' : 'query',
-                        'required' => $isPathParam,
-                        'schema' => $this->schemaFromType($paramType),
-                    ];
+                // Use operation transformers to build the operation
+                $operation = null;
+                $schemaConverter = \Closure::fromCallable([$this, 'schemaFromType']);
+                
+                foreach ($this->operationTransformers as $transformer) {
+                    $operation = $transformer->transform(
+                        $engine,
+                        $fqcn,
+                        $methodName,
+                        $meta['return'],
+                        $meta['params'],
+                        $schemaConverter
+                    );
+                    if ($operation !== null) {
+                        break;
+                    }
                 }
 
-                $operation = [
-                    'operationId' => $fqcn . '::' . $methodName,
-                    'summary' => $this->generateSummary($controllerBase, $methodName),
-                    'responses' => $responses,
-                ];
+                // Fallback to default operation building
+                if ($operation === null) {
+                    $responses = [
+                        '200' => [
+                            'description' => 'OK',
+                            'content' => [
+                                'application/json' => [
+                                    'schema' => $this->schemaFromType($meta['return']),
+                                ],
+                            ],
+                        ],
+                    ];
 
-                if ($params !== []) {
-                    $operation['parameters'] = $params;
+                    // Build parameters
+                    $params = [];
+                    foreach ($meta['params'] as $p) {
+                        $paramType = $p['type'];
+                        $paramName = is_string($p['name']) ? $p['name'] : (string) $p['name'];
+
+                        // Check if param should be path parameter
+                        $isPathParam = str_contains($path, '{' . $paramName . '}');
+
+                        $params[] = [
+                            'name' => $paramName,
+                            'in' => $isPathParam ? 'path' : 'query',
+                            'required' => $isPathParam,
+                            'schema' => $this->schemaFromType($paramType),
+                        ];
+                    }
+
+                    $operation = [
+                        'operationId' => $fqcn . '::' . $methodName,
+                        'summary' => $this->generateSummary($controllerBase, $methodName),
+                        'responses' => $responses,
+                    ];
+
+                    if ($params !== []) {
+                        $operation['parameters'] = $params;
+                    }
                 }
 
                 $paths[$path][$verb] = $operation;
