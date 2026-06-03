@@ -251,6 +251,13 @@ final class Engine
                             foreach ($stmt->params as $p) {
                                 $pname = is_string($p->var->name) ? $p->var->name : (string) $p->var->name;
                                 $ptype = $this->mapTypeNode($p->type);
+                                
+                                // Resolve named object types
+                                if ($ptype instanceof \Lens\Types\NamedObjectType && ! str_contains($ptype->className, '\\')) {
+                                    $resolved = $this->resolveName($ptype->className);
+                                    $ptype = new \Lens\Types\NamedObjectType($resolved);
+                                }
+                                
                                 $params[] = [
                                     'name' => $pname,
                                     'type' => $ptype,
