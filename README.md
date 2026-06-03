@@ -19,13 +19,28 @@ OpenAPI 3.1 specification generator for Tempest PHP framework. Uses static analy
 composer require lens/openapi
 ```
 
-Install and publish configuration:
+### Install via Tempest CLI
+
+Lens registers an installer that automatically publishes the configuration file:
 
 ```bash
 php bin/tempest install lens
 ```
 
-This creates `app/lens.config.php` with default settings.
+This will:
+1. Create `app/lens.config.php` with default settings
+2. Register Scalar viewer routes (`/docs`, `/openapi.json`)
+3. Configure environment variable support
+
+### Manual Installation
+
+Copy the configuration file manually:
+
+```bash
+php bin/lens config:publish
+```
+
+Or copy `vendor/lens/openapi/config/lens.config.php` to your `app/` directory.
 
 ## Quick Start
 
