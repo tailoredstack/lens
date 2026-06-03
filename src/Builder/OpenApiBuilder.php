@@ -113,20 +113,44 @@ final class OpenApiBuilder
                 continue;
             }
 
+            // Extract controller name from FQCN
+            $shortName = substr($fqcn, strrpos($fqcn, '\\') + 1);
+            $isController = str_ends_with($shortName, 'Controller');
+            $controllerBase = $isController
+                ? lcfirst(str_replace('Controller', '', $shortName))
+                : strtolower($shortName);
+
             foreach ($methods as $name => $meta) {
                 // skip internal methods unless configured otherwise
                 if (! $includeInternal && str_starts_with($name, '__')) {
                     continue;
                 }
 
-                $http = $meta['http'] ?? null;
+                $http = $meta['http'] ?? 'get';
                 $path = $meta['path'] ?? null;
 
+                // Generate path from controller/method if not specified
                 if ($path === null) {
-                    $path = '/' . str_replace('\\', '/', strtolower($fqcn)) . '/' . $name;
+                    if ($isController) {
+                        // UserController + index → GET /users
+                        // UserController + show → GET /users/{id}
+                        $path = '/' . $controllerBase;
+                        
+                        // Add resource ID for show/update/delete methods
+                        if (in_array($name, ['show', 'update', 'patch', 'delete', 'destroy'])) {
+                            $path .= '/{id}';
+                        }
+                        
+                        // For methods that aren't standard REST, append method name
+                        if (! in_array($name, ['index', 'show', 'store', 'update', 'patch', 'delete', 'destroy'])) {
+                            $path .= '/' . $name;
+                        }
+                    } else {
+                        $path = '/' . str_replace('\\', '/', strtolower($fqcn)) . '/' . $name;
+                    }
                 }
 
-                $verb = $http ?? 'get';
+                $verb = strtolower($http);
 
                 $responses = [
                     '200' => [
@@ -139,26 +163,60 @@ final class OpenApiBuilder
                     ],
                 ];
 
+                // Build parameters
                 $params = [];
                 foreach ($meta['params'] as $p) {
+                    $paramType = $p['type'];
+                    $paramName = $p['name'];
+                    
+                    // Check if param should be path parameter
+                    $isPathParam = str_contains($path, '{' . $paramName . '}');
+                    
                     $params[] = [
-                        'name' => $p['name'],
-                        'in' => 'query',
-                        'schema' => $this->schemaFromType($p['type']),
+                        'name' => $paramName,
+                        'in' => $isPathParam ? 'path' : 'query',
+                        'required' => $isPathParam,
+                        'schema' => $this->schemaFromType($paramType),
                     ];
                 }
 
-                $paths[$path] = [
-                    $verb => [
-                        'operationId' => $fqcn . '::' . $name,
-                        'responses' => $responses,
-                        'parameters' => $params,
-                    ],
+                $operation = [
+                    'operationId' => $fqcn . '::' . $name,
+                    'summary' => $this->generateSummary($controllerBase, $name),
+                    'responses' => $responses,
                 ];
+
+                if ($params !== []) {
+                    $operation['parameters'] = $params;
+                }
+
+                $paths[$path][$verb] = $operation;
             }
         }
 
         return $paths;
+    }
+
+    private function generateSummary(string $resource, string $method): string
+    {
+        $summaries = [
+            'index' => "List all {$resource}",
+            'show' => "Get a specific {$resource}",
+            'store' => "Create a new {$resource}",
+            'update' => "Update a {$resource}",
+            'patch' => "Partially update a {$resource}",
+            'delete' => "Delete a {$resource}",
+            'destroy' => "Delete a {$resource}",
+        ];
+
+        if (isset($summaries[$method])) {
+            return $summaries[$method];
+        }
+
+        // Convert method name to human-readable
+        $words = preg_split('/(?=[A-Z])/', $method);
+        $words = array_filter($words, fn($w) => $w !== '');
+        return ucfirst(strtolower(implode(' ', $words)));
     }
 
     private function schemaFromNamedObject(NamedObjectType $obj): array
