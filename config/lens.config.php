@@ -26,10 +26,45 @@ namespace Lens\Config;
  * - LENS_SECURITY_SCHEMES: JSON string of security schemes
  */
 
-// Load from environment variables
-return LensConfig::fromEnv();
+// Recommended: Mix of environment variables with fallbacks
+return new LensConfig(
+    // Use LENS_TITLE env var, or derive from APP_NAME, or use default
+    title: env('LENS_TITLE', env('APP_NAME', 'Tempest') . ' API'),
+    
+    // Use LENS_VERSION env var, or use default
+    version: env('LENS_VERSION', '1.0.0'),
+    
+    // Use LENS_BASE_PATH env var, or use default
+    basePath: env('LENS_BASE_PATH', '/'),
+    
+    // Use LENS_SOURCES env var (comma-separated), or use default
+    sources: explode(',', env('LENS_SOURCES', 'src')),
+    
+    // Use LENS_EXCLUDE env var (comma-separated), or use default
+    exclude: array_filter(explode(',', env('LENS_EXCLUDE', ''))),
+    
+    // Scalar viewer configuration
+    scalar: new ScalarConfig(
+        enabled: env('LENS_SCALAR_ENABLED', true),
+        route: env('LENS_SCALAR_ROUTE', '/docs'),
+        specRoute: env('LENS_SCALAR_SPEC_ROUTE', '/openapi.json'),
+        title: env('LENS_SCALAR_TITLE', env('APP_NAME', 'API') . ' Documentation'),
+        specUrl: env('LENS_SCALAR_SPEC_URL'),
+    ),
+    
+    // Security schemes
+    securitySchemes: [
+        'bearerAuth' => [
+            'type' => 'http',
+            'scheme' => 'bearer',
+        ],
+    ],
+);
 
-// Or customize values directly:
+// Alternative: Load entirely from environment variables
+// return LensConfig::fromEnv();
+
+// Alternative: Fully customized values
 // return new LensConfig(
 //     sources: ['src', 'modules'],
 //     title: 'My API',
@@ -47,14 +82,7 @@ return LensConfig::fromEnv();
 //     ),
 //     
 //     securitySchemes: [
-//         'bearerAuth' => [
-//             'type' => 'http',
-//             'scheme' => 'bearer',
-//         ],
-//         'apiKey' => [
-//             'type' => 'apiKey',
-//             'in' => 'header',
-//             'name' => 'X-API-Key',
-//         ],
+//         'bearerAuth' => ['type' => 'http', 'scheme' => 'bearer'],
+//         'apiKey' => ['type' => 'apiKey', 'in' => 'header', 'name' => 'X-API-Key'],
 //     ],
 // );
