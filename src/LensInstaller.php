@@ -6,6 +6,7 @@ namespace Lens;
 
 use Tempest\Console\Console;
 use Tempest\Core\Installer;
+use Tempest\Core\PublishesFiles;
 use function Tempest\app_path;
 use function Tempest\root_path;
 
@@ -14,6 +15,8 @@ use function Tempest\root_path;
  */
 final class LensInstaller
 {
+    use PublishesFiles;
+
     public function __construct(
         private readonly Console $console = new Console(),
     ) {}
@@ -62,7 +65,7 @@ final class LensInstaller
     {
         $sourcePath = __DIR__ . '/../config/lens.config.php';
         
-        // Try app/ directory first, then root
+        // Determine target path
         $targetPath = null;
         if (is_dir(app_path())) {
             $targetPath = app_path('lens.config.php');
@@ -70,20 +73,11 @@ final class LensInstaller
             $targetPath = root_path('lens.config.php');
         }
 
-        if (file_exists($targetPath)) {
-            $this->console->writeln('<fg=yellow>⚠ Config file already exists. Skipping.</>');
-            return;
-        }
-
-        // Ensure directory exists
-        $targetDir = dirname($targetPath);
-        if (!is_dir($targetDir)) {
-            mkdir($targetDir, 0755, true);
-        }
-
-        copy($sourcePath, $targetPath);
-
-        $relativePath = str_replace(getcwd() . '/', '', $targetPath);
-        $this->console->writeln("<fg=green>✓</> Published <fg=cyan>{$relativePath}</>");
+        // Use PublishesFiles trait to publish
+        $this->publish(
+            source: $sourcePath,
+            destination: $targetPath,
+            confirm: false, // Already confirmed in install()
+        );
     }
 }
