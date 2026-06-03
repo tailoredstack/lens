@@ -1,5 +1,10 @@
 # Lens OpenAPI
 
+[![Tests](https://github.com/tailoredstack/lens/actions/workflows/tests.yml/badge.svg)](https://github.com/tailoredstack/lens/actions/workflows/tests.yml)
+[![Code Quality](https://github.com/tailoredstack/lens/actions/workflows/quality.yml/badge.svg)](https://github.com/tailoredstack/lens/actions/workflows/quality.yml)
+[![PHP Version](https://img.shields.io/badge/PHP-8.4--8.5-blue.svg)](https://php.net)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 OpenAPI 3.1 specification generator for Tempest PHP framework. Uses static analysis — no runtime execution required.
 
 ## Features
@@ -16,7 +21,7 @@ OpenAPI 3.1 specification generator for Tempest PHP framework. Uses static analy
 ## Installation
 
 ```bash
-composer require lens/openapi
+composer require tailoredstack/lens
 ```
 
 ### Install via Tempest CLI
