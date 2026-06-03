@@ -5,23 +5,27 @@ declare(strict_types=1);
 namespace Lens\Builder;
 
 use Lens\Config\OpenApiConfig;
+use Lens\Extensions\TypeToSchema\DefaultTypeToSchema;
+use Lens\Extensions\TypeToSchema\TypeToSchemaExtension;
 use Lens\Infer\Engine;
-use Lens\Types\ArrayType;
-use Lens\Types\EnumType;
-use Lens\Types\LiteralInteger;
-use Lens\Types\LiteralString;
-use Lens\Types\LiteralType;
-use Lens\Types\MixedType;
 use Lens\Types\NamedObjectType;
-use Lens\Types\NamedObjectType as RefNamedObject;
-use Lens\Types\Nullable;
-use Lens\Types\ObjectType;
 use Lens\Types\PropertyType;
-use Lens\Types\ScalarType;
-use Lens\Types\UnionType;
 
 final class OpenApiBuilder
 {
+    /** @var TypeToSchemaExtension[] */
+    private array $typeToSchemaExtensions = [];
+
+    public function __construct()
+    {
+        $this->typeToSchemaExtensions[] = new DefaultTypeToSchema();
+    }
+
+    public function addTypeToSchemaExtension(TypeToSchemaExtension $extension): void
+    {
+        array_unshift($this->typeToSchemaExtensions, $extension);
+    }
+
     public function buildFromInfer(Engine $engine, ?OpenApiConfig $config = null): array
     {
         $engine->analyze();
@@ -146,7 +150,7 @@ final class OpenApiBuilder
             $props[$p->name] = $this->schemaFromType($p->type);
 
             // property required if not nullable
-            if (! $p->type instanceof Nullable) {
+            if (! $p->type instanceof \Lens\Types\Nullable) {
                 $required[] = $p->name;
             }
         }
@@ -165,67 +169,10 @@ final class OpenApiBuilder
 
     private function schemaFromType($type): array
     {
-        // Enums and literals handled early to produce concise schemas
-        if ($type instanceof EnumType) {
-            $vals = $type->values;
-            // infer underlying primitive type from first value
-            $first = $vals[0] ?? null;
-            $t = is_int($first) ? 'integer' : 'string';
-            return [
-                'type' => $t,
-                'enum' => $vals,
-            ];
-        }
-
-        if ($type instanceof LiteralType) {
-            if ($type instanceof LiteralString) {
-                return ['type' => 'string', 'enum' => [$type->value]];
+        foreach ($this->typeToSchemaExtensions as $ext) {
+            if ($ext->supports($type)) {
+                return $ext->convert($type);
             }
-
-            if ($type instanceof LiteralInteger) {
-                return ['type' => 'integer', 'enum' => [$type->value]];
-            }
-        }
-
-        if ($type instanceof Nullable) {
-            $inner = $this->schemaFromType($type->inner);
-            $inner['nullable'] = true;
-            return $inner;
-        }
-
-        if ($type instanceof ScalarType) {
-            $map = [
-                'int' => 'integer',
-                'float' => 'number',
-                'bool' => 'boolean',
-                'string' => 'string',
-            ];
-
-            return ['type' => $map[$type->name] ?? 'string'];
-        }
-
-        if ($type instanceof ArrayType) {
-            return [
-                'type' => 'array',
-                'items' => $this->schemaFromType($type->value),
-            ];
-        }
-
-        if ($type instanceof UnionType) {
-            // Simplify: represent union as oneOf
-            $schemas = [];
-            foreach ($type->types as $t) {
-                $schemas[] = $this->schemaFromType($t);
-            }
-            return ['oneOf' => $schemas];
-        }
-
-        if ($type instanceof RefNamedObject) {
-            return ['$ref' => "#/components/schemas/{$type->className}"];
-        }
-
-        if ($type instanceof MixedType) {
-            return [];
         }
 
         // Fallback
