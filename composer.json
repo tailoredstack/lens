@@ -38,7 +38,13 @@
     },
     "extra": {
         "tempest": {
-            "can-discover": true
+            "can-discover": true,
+            "installers": [
+                "Lens\\LensInstaller"
+            ],
+            "bootables": [
+                "Lens\\LensBootable"
+            ]
         }
     },
     "scripts": {

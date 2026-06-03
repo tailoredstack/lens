@@ -12,8 +12,10 @@ foreach ([__DIR__ . '/../../../autoload.php', __DIR__ . '/../vendor/autoload.php
 }
 
 use Lens\Cli\GenerateCommand;
+use Lens\Cli\ConfigPublishCommand;
 use Symfony\Component\Console\Application;
 
 $application = new Application('Lens', '0.1.0');
 $application->add(new GenerateCommand());
+$application->add(new ConfigPublishCommand());
 $application->run();

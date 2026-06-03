@@ -2,54 +2,116 @@
 
 declare(strict_types=1);
 
-use Lens\Config\OpenApiConfig;
-use function Tempest\env;
+return [
+    /*
+    |--------------------------------------------------------------------------
+    | Lens OpenAPI Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configure the Lens OpenAPI generator and Scalar viewer.
+    |
+    */
 
-return new OpenApiConfig(
-    // Source directories to analyze for OpenAPI generation
-    sources: [base_path('app')],
+    /*
+    |--------------------------------------------------------------------------
+    | Source Directories
+    |--------------------------------------------------------------------------
+    |
+    | Directories to scan for Tempest controllers when generating OpenAPI spec.
+    |
+    */
+    'sources' => ['src'],
 
-    // API metadata
-    title: env('OPENAPI_TITLE', 'Lens OpenAPI'),
-    version: env('OPENAPI_VERSION', '0.0.0'),
-    basePath: env('OPENAPI_BASE_PATH', '/api'),
+    /*
+    |--------------------------------------------------------------------------
+    | API Information
+    |--------------------------------------------------------------------------
+    */
+    'title' => 'Tempest API',
+    'version' => '1.0.0',
+    'base_path' => '/',
 
-    // Namespaces to exclude from analysis
-    exclude: [
-        // 'App\\Http\\Requests',
-        // 'App\\Jobs',
-        // 'App\\Events',
+    /*
+    |--------------------------------------------------------------------------
+    | Exclude Patterns
+    |--------------------------------------------------------------------------
+    |
+    | Namespace patterns to exclude from OpenAPI generation.
+    |
+    */
+    'exclude' => [],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scalar Viewer Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configure the Scalar OpenAPI viewer.
+    |
+    */
+    'scalar' => [
+        /*
+        |--------------------------------------------------------------------------
+        | Enable Scalar Viewer
+        |--------------------------------------------------------------------------
+        |
+        | Set to false to disable the Scalar viewer routes.
+        |
+        */
+        'enabled' => true,
+
+        /*
+        |--------------------------------------------------------------------------
+        | Viewer Route Path
+        |--------------------------------------------------------------------------
+        |
+        | The route where the Scalar viewer will be accessible.
+        |
+        */
+        'route' => '/docs',
+
+        /*
+        |--------------------------------------------------------------------------
+        | Specification Route Path
+        |--------------------------------------------------------------------------
+        |
+        | The route where the OpenAPI JSON spec will be served.
+        |
+        */
+        'spec_route' => '/openapi.json',
+
+        /*
+        |--------------------------------------------------------------------------
+        | Page Title
+        |--------------------------------------------------------------------------
+        */
+        'title' => 'API Documentation',
+
+        /*
+        |--------------------------------------------------------------------------
+        | External Spec URL
+        |--------------------------------------------------------------------------
+        |
+        | If set, Scalar will load the spec from this URL instead of the
+        | internal spec_route. Useful for hosting spec separately.
+        | Leave null to use internal spec.
+        |
+        */
+        'spec_url' => null,
     ],
 
-    // Include __magic methods (e.g., __construct, __toString)
-    includeInternal: env('OPENAPI_INCLUDE_INTERNAL', false),
-
-    // Output format: 'json' or 'yaml'
-    outputFormat: env('OPENAPI_OUTPUT_FORMAT', 'json'),
-
-    // Export path (relative to project root)
-    exportPath: env('OPENAPI_EXPORT_PATH', 'openapi.json'),
-
-    // API domain for server URL generation
-    apiDomain: env('OPENAPI_API_DOMAIN'),
-
-    // Custom servers (overrides basePath + apiDomain)
-    // Example:
-    // servers: [
-    //     'Production' => 'https://api.example.com/v1',
-    //     'Staging' => 'https://api-staging.example.com/v1',
-    // ],
-    servers: null,
-
-    // Extension classes to customize behavior
-    extensions: [
-        // Operation transformers
-        // \App\OpenApi\CustomOperationTransformer::class,
-
-        // Type-to-schema converters
-        // \App\OpenApi\CustomTypeToSchema::class,
-
-        // Exception-to-response mappers
-        // \App\OpenApi\CustomExceptionToResponse::class,
+    /*
+    |--------------------------------------------------------------------------
+    | Security Schemes
+    |--------------------------------------------------------------------------
+    |
+    | Define security schemes for your API.
+    |
+    */
+    'security_schemes' => [
+        'bearerAuth' => [
+            'type' => 'http',
+            'scheme' => 'bearer',
+        ],
     ],
-);
+];

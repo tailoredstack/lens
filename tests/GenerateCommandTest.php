@@ -8,7 +8,7 @@ use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 use Lens\Cli\GenerateCommand;
 
-// Phase 3.1: CLI tests
+// CLI generate command tests
 
 beforeEach(function () {
     $this->tmpDir = sys_get_temp_dir() . '/lens_cli_test_' . uniqid();
@@ -45,7 +45,7 @@ afterEach(function () {
     }
 });
 
-test('CLI generates OpenAPI spec', function () {
+test('generate command creates OpenAPI spec', function () {
     $application = new Application();
     $command = new GenerateCommand();
     $application->addCommand($command);
@@ -75,7 +75,7 @@ test('CLI generates OpenAPI spec', function () {
     expect($spec['paths'])->toHaveKey('/test');
 });
 
-test('CLI excludes namespaces', function () {
+test('generate command excludes namespaces', function () {
     $application = new Application();
     $command = new GenerateCommand();
     $application->addCommand($command);
@@ -97,7 +97,7 @@ test('CLI excludes namespaces', function () {
     expect($spec['paths'])->toBeEmpty();
 });
 
-test('CLI outputs YAML format', function () {
+test('generate command outputs YAML format', function () {
     $application = new Application();
     $command = new GenerateCommand();
     $application->addCommand($command);
@@ -125,7 +125,7 @@ test('CLI outputs YAML format', function () {
     unlink($yamlOutput);
 });
 
-test('CLI fails with invalid source', function () {
+test('generate command fails with invalid source', function () {
     $application = new Application();
     $command = new GenerateCommand();
     $application->addCommand($command);
@@ -144,7 +144,7 @@ test('CLI fails with invalid source', function () {
     expect($output)->toContain('Source directory not found');
 });
 
-test('CLI includes base path in servers', function () {
+test('generate command includes base path in servers', function () {
     $application = new Application();
     $command = new GenerateCommand();
     $application->addCommand($command);
