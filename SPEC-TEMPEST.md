@@ -741,29 +741,84 @@ return new \Tempest\OpenApi\Config\OpenApiConfig(
 );
 ```
 
-### 7.3 Auto‑Registration via Package Discovery
+### 7.3 Package Registration
+
+Tempest packages do not use service providers. Registration is handled through three mechanisms:
+
+#### 7.3.1 Composer Metadata (Mandatory)
+
+```json
+{
+    "name": "tempest/openapi",
+    "require": {
+        "tempest/framework": "^3.11"
+    },
+    "extra": {
+        "tempest": {
+            "can-discover": true
+        }
+    }
+}
+```
+
+The `extra.tempest.can-discover: true` flag makes Tempest's discovery system scan the package for discoverable classes (Discoveries, ConsoleCommands, Config, etc.).
+
+#### 7.3.2 Installer (Publishes Config + Stubs)
+
+An installer lets users publish the config file into their project via the `install` CLI command.
 
 ```php
-// src/OpenApiPackage.php
+// src/OpenApiInstaller.php
 namespace Tempest\OpenApi;
 
-use Tempest\Discovery\DiscoveryLocation;
 use Tempest\Core\Installer;
+use Tempest\Core\PublishesFiles;
+use Tempest\Discovery\SkipDiscovery;
 
-final class OpenApiPackage implements Installer
+#[SkipDiscovery] // Prevent the installer itself from being auto-discovered
+final readonly class OpenApiInstaller
 {
-    public function getInstallers(): array
+    use PublishesFiles;
+
+    #[Installer(name: 'openapi', alias: ['openapi-config'])]
+    public function install(): void
     {
-        return [
-            new DiscoveryLocation(
-                name: 'openapi',
-                handler: OpenApiRouteDiscovery::class,
-            ),
-            new DiscoveryLocation(
-                name: 'openapi-config',
-                handler: OpenApiConfigDiscovery::class,
-            ),
-        ];
+        $this->publish(
+            source: __DIR__ . '/Stubs/openapi.config.php',
+            destination: 'openapi.config.php',
+            confirm: false, // Always publish config
+        );
+
+        $this->publishImports();
+    }
+}
+```
+
+#### 7.3.3 Bootstrapping via Kernel Event (Optional)
+
+If runtime setup is needed (e.g., registering middleware, initializing state), use a `#[EventHandler(KernelEvent::BOOTED)]` method:
+
+```php
+// src/OpenApiProvider.php
+namespace Tempest\OpenApi;
+
+use Tempest\Container\Container;
+use Tempest\Core\KernelEvent;
+use Tempest\EventBus\EventHandler;
+use Tempest\Discovery\SkipDiscovery;
+
+#[SkipDiscovery]
+final readonly class OpenApiProvider
+{
+    public function __construct(
+        private Container $container,
+    ) {}
+
+    #[EventHandler(KernelEvent::BOOTED)]
+    public function register(): void
+    {
+        // Register the UI controller route
+        $this->container->singleton(OpenApiUiController::class);
     }
 }
 ```

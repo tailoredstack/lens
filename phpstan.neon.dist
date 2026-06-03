@@ -1,0 +1,11 @@
+includes:
+    - vendor/phpstan/phpstan/conf/neon/phpstan.neon
+parameters:
+    level: 5
+    tmpDir: .cache/phpstan
+    paths:
+        - src
+        - tests
+    excludePaths:
+        analyse: []
+    reportUnmatchedIgnoredErrors: true

@@ -1,0 +1,11 @@
+/vendor/
+/.cache/
+/.tempest/
+/.idea/
+/build/
+*.sqlite
+.env
+composer.lock
+debug.log
+tempest.log
+node_modules/

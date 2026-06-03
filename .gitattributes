@@ -1,0 +1,16 @@
+.github/                  export-ignore
+tests/                    export-ignore
+.gitattributes            export-ignore
+.gitignore                export-ignore
+phpunit.xml.dist          export-ignore
+phpstan.neon.dist         export-ignore
+mago.toml                 export-ignore
+FEATURES.md               export-ignore
+ROADMAP.md                export-ignore
+SPEC-LARAVEL.md           export-ignore
+SPEC-TEMPEST.md           export-ignore
+SPEC-TEST-MATRIX.md       export-ignore
+TODO.md                   export-ignore
+
+*.php diff=php
+*.md diff=markdown

@@ -1,0 +1,48 @@
+{
+    "name": "tempest/openapi",
+    "description": "OpenAPI 3.1 spec generator for Tempest PHP — static analysis, no runtime execution.",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^8.5",
+        "tempest/core": "3.x-dev",
+        "tempest/router": "3.x-dev",
+        "tempest/http": "3.x-dev",
+        "tempest/database": "3.x-dev",
+        "tempest/validation": "3.x-dev",
+        "tempest/mapper": "3.x-dev",
+        "tempest/view": "3.x-dev",
+        "tempest/container": "3.x-dev",
+        "tempest/discovery": "3.x-dev",
+        "tempest/reflection": "3.x-dev",
+        "tempest/support": "3.x-dev",
+        "tempest/console": "3.x-dev",
+        "nikic/php-parser": "^5.3",
+        "symfony/yaml": "^7.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^12.5",
+        "phpstan/phpstan": "^2.1",
+        "carthage-software/mago": "^1.16"
+    },
+    "autoload": {
+        "psr-4": {
+            "Tempest\\OpenApi\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tempest\\OpenApi\\Tests\\": "tests"
+        }
+    },
+    "extra": {
+        "tempest": {
+            "can-discover": true
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

@@ -35,6 +35,21 @@ The core pipeline never executes application code — all analysis is static (AS
 Source Code → Route Discovery → Operation Transformation → Type Inference → Type→Schema Mapping → Document Assembly → OpenAPI 3.1 Spec
 ```
 
+## Package Development
+
+This package follows Tempest's official package development conventions:
+
+| Aspect | Approach |
+|--------|----------|
+| Registration | `composer.json` with `extra.tempest.can-discover: true` (no service providers) |
+| Discovery | `Discovery` + `#[ConsoleCommand]` + config files auto-discovered via Composer metadata |
+| Installer | `#[Installer]` attribute + `PublishesFiles` trait for publishing config to user's project |
+| Bootstrapping | `#[EventHandler(KernelEvent::BOOTED)]` for any runtime setup |
+| Testing | Extends `Tempest\Framework\Testing\IntegrationTest` |
+| Config | Plain PHP file returning a config object (`openapi.config.php`) |
+
+For details, see [`SPEC-TEMPEST.md` §7.3](SPEC-TEMPEST.md#73-package-registration).
+
 ## License
 
 MIT
