@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -e
+
+echo "── Pre-commit checks ──────────────────────"
+
+# Stage relevant files
+STAGED_PHP=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.php$' || true)
+
+if [ -z "$STAGED_PHP" ]; then
+    echo "No PHP files staged — skipping format/lint."
+else
+    echo "→ Formatting..."
+    vendor/bin/mago fmt --check 2>/dev/null || {
+        echo "✗ Format check failed. Run 'composer fmt' to fix."
+        exit 1
+    }
+
+    echo "→ Linting..."
+    vendor/bin/mago lint 2>/dev/null || {
+        echo "✗ Lint failed."
+        exit 1
+    }
+fi
+
+echo "→ Running tests..."
+vendor/bin/pest --quiet --min=100 2>/dev/null || {
+    echo "✗ Tests failed or coverage below 100%."
+    exit 1
+}
+
+echo "✓ All checks passed."

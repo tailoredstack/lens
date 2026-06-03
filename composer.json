@@ -40,6 +40,7 @@
         }
     },
     "scripts": {
+        "setup": "git config core.hooksPath .githooks",
         "type-coverage": "php bin/type-coverage.php",
         "test": "vendor/bin/pest --coverage --min=100",
         "fmt": "vendor/bin/mago fmt",
