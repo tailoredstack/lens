@@ -7,12 +7,14 @@ namespace Lens;
 use Lens\Config\LensConfig;
 use Tempest\Container\Container;
 use Tempest\Core\Bootable;
+use function Tempest\app_path;
+use function Tempest\root_path;
 
 /**
  * Lens bootable class.
  * 
  * Loads configuration when the Tempest application boots.
- * Priority: 1) Environment variables, 2) Config file, 3) Defaults
+ * Priority: 1) Config file (app/lens.config.php), 2) Environment variables
  */
 final class LensBootable implements Bootable
 {
@@ -27,7 +29,7 @@ final class LensBootable implements Bootable
 
     private function loadConfig(): ?LensConfig
     {
-        // First, try to load from config file (app/ or root)
+        // Try to load from config file first (user customization)
         $configPath = null;
         
         if (function_exists('Tempest\app_path') && file_exists(\Tempest\app_path('lens.config.php'))) {
@@ -36,8 +38,7 @@ final class LensBootable implements Bootable
             $configPath = \Tempest\root_path('lens.config.php');
         }
 
-        // If config file exists, load it (it may use fromEnv() internally)
-        if ($configPath !== null && file_exists($configPath)) {
+        if ($configPath !== null) {
             $config = require $configPath;
             
             if ($config instanceof LensConfig) {
@@ -45,7 +46,7 @@ final class LensBootable implements Bootable
             }
         }
 
-        // Fallback: load from environment variables directly
+        // Fallback to environment variables
         return LensConfig::fromEnv();
     }
 }

@@ -63,8 +63,6 @@ final class LensInstaller
      */
     public function publishConfig(): void
     {
-        $sourcePath = __DIR__ . '/../config/lens.config.php';
-        
         // Determine target path
         $targetPath = null;
         if (is_dir(app_path())) {
@@ -73,11 +71,49 @@ final class LensInstaller
             $targetPath = root_path('lens.config.php');
         }
 
-        // Use PublishesFiles trait to publish
-        $this->publish(
-            source: $sourcePath,
-            destination: $targetPath,
-            confirm: false, // Already confirmed in install()
-        );
+        // Check if already exists
+        if (file_exists($targetPath)) {
+            $this->console->writeln('<fg=yellow>⚠ Config file already exists. Skipping.</>');
+            return;
+        }
+
+        // Create minimal stub config
+        $stub = <<<'PHP'
+<?php
+
+declare(strict_types=1);
+
+namespace Lens\Config;
+
+use function Tempest\env;
+
+/**
+ * Lens OpenAPI configuration.
+ * 
+ * Customize values or use environment variables (LENS_*).
+ */
+return new LensConfig(
+    title: env('LENS_TITLE', env('APP_NAME', 'Tempest') . ' API'),
+    version: env('LENS_VERSION', '1.0.0'),
+    basePath: env('LENS_BASE_PATH', '/'),
+    
+    scalar: new ScalarConfig(
+        enabled: env('LENS_SCALAR_ENABLED', true),
+        route: env('LENS_SCALAR_ROUTE', '/docs'),
+        title: env('LENS_SCALAR_TITLE', env('APP_NAME', 'API') . ' Documentation'),
+    ),
+);
+PHP;
+
+        // Ensure directory exists
+        $targetDir = dirname($targetPath);
+        if (!is_dir($targetDir)) {
+            mkdir($targetDir, 0755, true);
+        }
+
+        file_put_contents($targetPath, $stub);
+
+        $relativePath = str_replace(getcwd() . '/', '', $targetPath);
+        $this->console->writeln("<fg=green>✓</> Published <fg=cyan>{$relativePath}</>");
     }
 }

@@ -28,7 +28,7 @@ php bin/tempest install lens
 ```
 
 This will:
-1. Create `app/lens.config.php` with default settings
+1. Create `app/lens.config.php` with minimal stub
 2. Register Scalar viewer routes (`/docs`, `/openapi.json`)
 3. Configure environment variable support
 
@@ -40,7 +40,16 @@ Copy the configuration file manually:
 php bin/lens config:publish
 ```
 
-Or copy `vendor/lens/openapi/config/lens.config.php` to your `app/` directory.
+### No Config? No Problem
+
+If no config file exists, Lens automatically uses `LensConfig::fromEnv()` which loads from environment variables with sensible defaults:
+
+```env
+LENS_TITLE="My API"
+LENS_VERSION=2.0.0
+LENS_BASE_PATH=/api/v1
+LENS_SCALAR_ROUTE=/docs
+```
 
 ## Quick Start
 
@@ -68,26 +77,23 @@ Scalar viewer serves your OpenAPI spec with interactive API explorer.
 
 ### Config File (`app/lens.config.php`)
 
+After running `php bin/tempest install lens`, a minimal stub is created:
+
 ```php
 return new LensConfig(
     title: env('LENS_TITLE', env('APP_NAME') . ' API'),
     version: env('LENS_VERSION', '1.0.0'),
     basePath: env('LENS_BASE_PATH', '/'),
-    sources: ['src'],
-    exclude: ['App\\Internal'],
     
     scalar: new ScalarConfig(
-        enabled: true,
-        route: '/docs',
-        specRoute: '/openapi.json',
+        enabled: env('LENS_SCALAR_ENABLED', true),
+        route: env('LENS_SCALAR_ROUTE', '/docs'),
         title: env('LENS_SCALAR_TITLE', 'API Documentation'),
     ),
-    
-    securitySchemes: [
-        'bearerAuth' => ['type' => 'http', 'scheme' => 'bearer'],
-    ],
 );
 ```
+
+Customize by editing the file or using environment variables.
 
 ### Environment Variables
 

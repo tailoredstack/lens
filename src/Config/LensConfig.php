@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Lens\Config;
 
+use function Tempest\env;
+
 /**
  * Lens OpenAPI configuration.
- * 
+ *
  * Values are loaded from environment variables with LENS_* prefix
  * or from lens.config.php file.
  */
@@ -16,48 +18,51 @@ final readonly class LensConfig
         /**
          * Directories to scan for Tempest controllers.
          * Env: LENS_SOURCES (comma-separated paths)
+         *
          * @var string[]
          */
         public array $sources = ['src'],
-        
+
         /**
          * API title for OpenAPI spec.
          * Env: LENS_TITLE
          */
         public string $title = 'Tempest API',
-        
+
         /**
          * API version for OpenAPI spec.
          * Env: LENS_VERSION
          */
         public string $version = '1.0.0',
-        
+
         /**
          * Base path for API endpoints.
          * Env: LENS_BASE_PATH
          */
         public string $basePath = '/',
-        
+
         /**
          * Namespace patterns to exclude from OpenAPI generation.
          * Env: LENS_EXCLUDE (comma-separated patterns)
+         *
          * @var string[]
          */
         public array $exclude = [],
-        
+
         /**
          * Include internal methods (starting with __).
          * Env: LENS_INCLUDE_INTERNAL
          */
         public bool $includeInternal = false,
-        
+
         /**
          * Scalar viewer configuration.
          */
-        public ScalarConfig $scalar = new ScalarConfig(),
-        
+        public ScalarConfig $scalar = new ScalarConfig,
+
         /**
          * Security schemes for OpenAPI spec.
+         *
          * @var array<string, array>
          */
         public array $securitySchemes = [
@@ -108,7 +113,7 @@ final readonly class LensConfig
     private static function parseSecuritySchemesFromEnv(): array
     {
         $securitySchemes = env('LENS_SECURITY_SCHEMES');
-        
+
         if ($securitySchemes === null || $securitySchemes === '') {
             return [
                 'bearerAuth' => [
@@ -119,7 +124,7 @@ final readonly class LensConfig
         }
 
         $decoded = json_decode($securitySchemes, true);
-        
+
         if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
             return $decoded;
         }
