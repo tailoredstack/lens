@@ -28,20 +28,18 @@ final class ScalarViewerController
     #[Get('/docs')]
     public function view(): Response
     {
+        /** @var \Lens\Config\LensConfig $lensConfig */
+        $lensConfig = config('lens');
+        
         // Check if viewer is enabled
-        if (!config('lens.scalar.enabled', true)) {
+        if (!$lensConfig?->scalar->enabled) {
             return Response::notFound();
         }
 
-        $route = config('lens.scalar.route', '/docs');
-        $specRoute = config('lens.scalar.spec_route', '/openapi.json');
-        $title = config('lens.scalar.title', 'API Documentation');
-        $specUrl = config('lens.scalar.spec_url');
-        
-        // Use external spec URL or internal
-        $specUrl = $specUrl ?? $specRoute;
-        
-        $html = $this->getScalarHtml($specUrl, $title);
+        $html = $this->getScalarHtml(
+            $lensConfig->scalar->getSpecUrl(),
+            $lensConfig->scalar->title
+        );
         
         return Response::html($html)
             ->withStatus(Status::OK);
@@ -53,30 +51,17 @@ final class ScalarViewerController
     #[Get('/openapi.json')]
     public function spec(): Response
     {
+        /** @var \Lens\Config\LensConfig $lensConfig */
+        $lensConfig = config('lens');
+        
         // Check if viewer is enabled
-        if (!config('lens.scalar.enabled', true)) {
+        if (!$lensConfig) {
             return Response::notFound();
         }
 
-        $sources = config('lens.sources', ['src']);
-        $title = config('lens.title', 'Tempest API');
-        $version = config('lens.version', '1.0.0');
-        $basePath = config('lens.base_path', '/');
-        $exclude = config('lens.exclude', []);
-        $securitySchemes = config('lens.security_schemes', []);
-        
-        $config = new OpenApiConfig(
-            sources: $sources,
-            title: $title,
-            version: $version,
-            basePath: $basePath,
-            exclude: $exclude,
-            securitySchemes: $securitySchemes,
-        );
-        
-        $engine = new Engine($sources);
+        $engine = new Engine($lensConfig->sources);
         $builder = new OpenApiBuilder();
-        $spec = $builder->buildFromInfer($engine, $config);
+        $spec = $builder->buildFromInfer($engine, $lensConfig->toOpenApiConfig());
         
         return Response::json($spec)
             ->withStatus(Status::OK);

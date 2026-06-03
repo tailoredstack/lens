@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Lens\Integration;
 
+use Lens\Config\LensConfig;
 use Lens\Config\OpenApiConfig;
 use Lens\Infer\Engine;
 use Lens\Builder\OpenApiBuilder;
@@ -77,5 +78,13 @@ HTML;
         $builder = new OpenApiBuilder();
         
         return $builder->buildFromInfer($engine, $config);
+    }
+
+    /**
+     * Generate OpenAPI spec from LensConfig.
+     */
+    public function generateSpecFromConfig(LensConfig $lensConfig): array
+    {
+        return $this->generateSpec($lensConfig->sources, $lensConfig->toOpenApiConfig());
     }
 }

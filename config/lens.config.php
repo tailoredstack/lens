@@ -2,116 +2,59 @@
 
 declare(strict_types=1);
 
-return [
-    /*
-    |--------------------------------------------------------------------------
-    | Lens OpenAPI Configuration
-    |--------------------------------------------------------------------------
-    |
-    | Configure the Lens OpenAPI generator and Scalar viewer.
-    |
-    */
+namespace Lens\Config;
 
-    /*
-    |--------------------------------------------------------------------------
-    | Source Directories
-    |--------------------------------------------------------------------------
-    |
-    | Directories to scan for Tempest controllers when generating OpenAPI spec.
-    |
-    */
-    'sources' => ['src'],
+/**
+ * Lens OpenAPI configuration.
+ * 
+ * Copy this file to your app/ directory as `lens.config.php` to customize.
+ * 
+ * Environment variables (LENS_*) take precedence over file values.
+ * 
+ * Available environment variables:
+ * - LENS_SOURCES: Comma-separated list of source directories (default: "src")
+ * - LENS_TITLE: API title (default: "Tempest API")
+ * - LENS_VERSION: API version (default: "1.0.0")
+ * - LENS_BASE_PATH: Base path for API (default: "/")
+ * - LENS_EXCLUDE: Comma-separated list of namespaces to exclude
+ * - LENS_INCLUDE_INTERNAL: Include internal methods (default: false)
+ * - LENS_SCALAR_ENABLED: Enable Scalar viewer (default: true)
+ * - LENS_SCALAR_ROUTE: Scalar viewer route (default: "/docs")
+ * - LENS_SCALAR_SPEC_ROUTE: OpenAPI JSON route (default: "/openapi.json")
+ * - LENS_SCALAR_TITLE: Scalar page title (default: "API Documentation")
+ * - LENS_SCALAR_SPEC_URL: External spec URL (default: null)
+ * - LENS_SECURITY_SCHEMES: JSON string of security schemes
+ */
 
-    /*
-    |--------------------------------------------------------------------------
-    | API Information
-    |--------------------------------------------------------------------------
-    */
-    'title' => 'Tempest API',
-    'version' => '1.0.0',
-    'base_path' => '/',
+// Load from environment variables
+return LensConfig::fromEnv();
 
-    /*
-    |--------------------------------------------------------------------------
-    | Exclude Patterns
-    |--------------------------------------------------------------------------
-    |
-    | Namespace patterns to exclude from OpenAPI generation.
-    |
-    */
-    'exclude' => [],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Scalar Viewer Configuration
-    |--------------------------------------------------------------------------
-    |
-    | Configure the Scalar OpenAPI viewer.
-    |
-    */
-    'scalar' => [
-        /*
-        |--------------------------------------------------------------------------
-        | Enable Scalar Viewer
-        |--------------------------------------------------------------------------
-        |
-        | Set to false to disable the Scalar viewer routes.
-        |
-        */
-        'enabled' => true,
-
-        /*
-        |--------------------------------------------------------------------------
-        | Viewer Route Path
-        |--------------------------------------------------------------------------
-        |
-        | The route where the Scalar viewer will be accessible.
-        |
-        */
-        'route' => '/docs',
-
-        /*
-        |--------------------------------------------------------------------------
-        | Specification Route Path
-        |--------------------------------------------------------------------------
-        |
-        | The route where the OpenAPI JSON spec will be served.
-        |
-        */
-        'spec_route' => '/openapi.json',
-
-        /*
-        |--------------------------------------------------------------------------
-        | Page Title
-        |--------------------------------------------------------------------------
-        */
-        'title' => 'API Documentation',
-
-        /*
-        |--------------------------------------------------------------------------
-        | External Spec URL
-        |--------------------------------------------------------------------------
-        |
-        | If set, Scalar will load the spec from this URL instead of the
-        | internal spec_route. Useful for hosting spec separately.
-        | Leave null to use internal spec.
-        |
-        */
-        'spec_url' => null,
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Security Schemes
-    |--------------------------------------------------------------------------
-    |
-    | Define security schemes for your API.
-    |
-    */
-    'security_schemes' => [
-        'bearerAuth' => [
-            'type' => 'http',
-            'scheme' => 'bearer',
-        ],
-    ],
-];
+// Or customize values directly:
+// return new LensConfig(
+//     sources: ['src', 'modules'],
+//     title: 'My API',
+//     version: '2.0.0',
+//     basePath: '/api/v1',
+//     exclude: ['App\\Internal'],
+//     includeInternal: false,
+//     
+//     scalar: new ScalarConfig(
+//         enabled: true,
+//         route: '/docs',
+//         specRoute: '/openapi.json',
+//         title: 'API Documentation',
+//         specUrl: null,
+//     ),
+//     
+//     securitySchemes: [
+//         'bearerAuth' => [
+//             'type' => 'http',
+//             'scheme' => 'bearer',
+//         ],
+//         'apiKey' => [
+//             'type' => 'apiKey',
+//             'in' => 'header',
+//             'name' => 'X-API-Key',
+//         ],
+//     ],
+// );
