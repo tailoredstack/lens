@@ -1,0 +1,48 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use Lens\Commands\GenerateOpenApiCommand;
+
+if (PHP_SAPI !== 'cli') {
+    exit(1);
+}
+
+$args = $argv;
+array_shift($args);
+
+$output = '-';
+$format = 'json';
+$title = null;
+$version = null;
+$basePath = null;
+
+while ($arg = array_shift($args)) {
+    match ($arg) {
+        '-o', '--output' => $output = array_shift($args),
+        '-f', '--format' => $format = array_shift($args),
+        '--title' => $title = array_shift($args),
+        '--version' => $version = array_shift($args),
+        '--base-path' => $basePath = array_shift($args),
+        '-h', '--help' => print <<<HELP
+Usage: bin/openapi [options]
+
+Options:
+  -o, --output FILE    Output file (default: stdout, use '-' for stdout)
+  -f, --format FORMAT  Output format: json or yaml (default: json)
+  --title TITLE        OpenAPI title
+  --version VERSION    OpenAPI version
+  --base-path PATH     Base path for servers
+  -h, --help           Show this help
+
+HELP
+        ,
+        default => null,
+    };
+}
+
+$cmd = new GenerateOpenApiCommand();
+exit($cmd($output, $format, $title, $version, $basePath));

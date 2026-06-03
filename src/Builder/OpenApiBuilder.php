@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Lens\Builder;
 
 use Lens\Infer\Engine;
+use Lens\Config\OpenApiConfig;
 use Lens\Types\NamedObjectType;
 use Lens\Types\ObjectType;
 use Lens\Types\PropertyType;
@@ -21,10 +22,11 @@ use Lens\Types\LiteralType;
 
 final class OpenApiBuilder
 {
-    public function buildFromInfer(Engine $engine): array
+    public function buildFromInfer(Engine $engine, ?OpenApiConfig $config = null): array
     {
         $engine->analyze();
         $types = $engine->getTypes();
+        $operations = $engine->getOperations();
 
         $schemas = [];
 
@@ -36,17 +38,71 @@ final class OpenApiBuilder
             $schemas[$fqcn] = $this->schemaFromNamedObject($type);
         }
 
+        $title = $config->title ?? 'Lens OpenAPI';
+        $version = $config->version ?? '0.0.0';
+
         return [
             'openapi' => '3.1.0',
             'info' => [
-                'title' => 'Lens OpenAPI',
-                'version' => '0.0.0',
+                'title' => $title,
+                'version' => $version,
             ],
-            'paths' => new \ArrayObject(),
+            'servers' => [
+                ['url' => $config->basePath ?? '/'],
+            ],
+            'paths' => $this->buildPaths($operations, $types),
             'components' => [
                 'schemas' => $schemas,
             ],
         ];
+    }
+
+    private function buildPaths(array $operations, array $types): array
+    {
+        $paths = [];
+
+        foreach ($operations as $fqcn => $methods) {
+            foreach ($methods as $name => $meta) {
+                $http = $meta['http'] ?? null;
+                $path = $meta['path'] ?? null;
+
+                if ($path === null) {
+                    $path = '/' . str_replace('\\', '/', strtolower($fqcn)) . '/' . $name;
+                }
+
+                $verb = $http ?? 'get';
+
+                $responses = [
+                    '200' => [
+                        'description' => 'OK',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => $this->schemaFromType($meta['return']),
+                            ],
+                        ],
+                    ],
+                ];
+
+                $params = [];
+                foreach ($meta['params'] as $p) {
+                    $params[] = [
+                        'name' => $p['name'],
+                        'in' => 'query',
+                        'schema' => $this->schemaFromType($p['type']),
+                    ];
+                }
+
+                $paths[$path] = [
+                    $verb => [
+                        'operationId' => $fqcn . '::' . $name,
+                        'responses' => $responses,
+                        'parameters' => $params,
+                    ],
+                ];
+            }
+        }
+
+        return $paths;
     }
 
     private function schemaFromNamedObject(NamedObjectType $obj): array
