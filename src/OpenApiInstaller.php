@@ -16,10 +16,12 @@ final class OpenApiInstaller implements Installer
     public function install(): void
     {
         $this->publish(
-            source: __DIR__ . '/../config/openapi.php',
-            destination: 'config/openapi.php',
+            source: __DIR__ . '/../config/lens.config.php',
+            destination: 'lens.config.php',
         );
 
-        $this->console->success('Lens OpenAPI installed. Config published to config/openapi.php');
+        $this->console->success('Lens OpenAPI installed. Config published to lens.config.php');
+        $this->console->writeln('Customize your configuration in lens.config.php');
+        $this->console->writeln('Generate your spec with: <info>php tempest openapi:generate</info>');
     }
 }

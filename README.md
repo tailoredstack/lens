@@ -64,6 +64,16 @@ $config = new OpenApiConfig(
 $spec = OpenApi::generate($config);
 ```
 
+### Configuration
+
+Publish the config file:
+
+```bash
+php tempest lens:install
+```
+
+This creates `lens.config.php` in your project root. Customize options like title, version, basePath, and exclusions.
+
 ## Features
 
 - **Static analysis** — no runtime execution required

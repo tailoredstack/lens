@@ -29,7 +29,6 @@ final readonly class OpenApiConfig
         public string $exportPath = 'openapi.json',
         public ?string $apiDomain = null,
         public ?array $servers = null,
-        public array $ui = [],
         public array $extensions = [],
     ) {
         $this->sources = $sources;

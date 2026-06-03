@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Lens\Discovery;
 
 use Lens\Config\OpenApiConfig;
+use Lens\Facade;
 use Lens\OpenApi;
 use Tempest\Discovery\Discovery;
 use Tempest\Discovery\DiscoveryLocation;
@@ -15,7 +16,8 @@ final class OpenApiDiscovery implements Discovery
 
     public function discover(DiscoveryLocation $location): void
     {
-        // Called during Tempest boot to discover controllers
+        // Called during Tempest boot to discover controllers and other discoverable items
+        // Configuration files (*.config.php) are auto-discovered by Tempest
     }
 
     public function initialize(): void
@@ -29,6 +31,7 @@ final class OpenApiDiscovery implements Discovery
 
     public function generateOpenApi(OpenApiConfig $config): array
     {
-        return OpenApi::generate($config);
+        // Use Facade for consistent API
+        return Facade::generate($config);
     }
 }

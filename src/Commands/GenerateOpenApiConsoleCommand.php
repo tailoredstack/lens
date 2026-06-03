@@ -11,12 +11,17 @@ use Tempest\Console\ConsoleCommand;
 use Tempest\Console\HandlesArguments;
 use Tempest\Console\HandlesOptions;
 use Tempest\Console\HasConsole;
+use Tempest\Container\Container;
 
 final class GenerateOpenApiConsoleCommand
 {
     use HasConsole;
     use HandlesArguments;
     use HandlesOptions;
+
+    public function __construct(
+        private Container $container,
+    ) {}
 
     #[ConsoleCommand(name: 'openapi:generate', description: 'Generate OpenAPI specification')]
     public function __invoke(
@@ -28,14 +33,27 @@ final class GenerateOpenApiConsoleCommand
         array $exclude = [],
         bool $includeInternal = false,
     ): int {
+        // Try to load config from container, or create new one
+        try {
+            $config = $this->container->get(OpenApiConfig::class);
+        } catch (\Throwable) {
+            $config = new OpenApiConfig();
+        }
+
+        // Override with CLI options
         $config = new OpenApiConfig(
-            sources: [],
-            title: $title ?? 'Lens OpenAPI',
-            version: $version ?? '0.0.0',
-            basePath: $basePath ?? '/',
-            exclude: $exclude,
-            includeInternal: $includeInternal,
+            sources: $config->sources,
+            title: $title ?? $config->title,
+            version: $version ?? $config->version,
+            basePath: $basePath ?? $config->basePath,
+            exclude: $exclude !== [] ? $exclude : $config->exclude,
+            includeInternal: $includeInternal || $config->includeInternal,
             outputFormat: $format,
+            exportPath: $config->exportPath,
+            apiDomain: $config->apiDomain,
+            servers: $config->servers,
+            ui: $config->ui,
+            extensions: $config->extensions,
         );
 
         $discovery = new OpenApiDiscovery();
