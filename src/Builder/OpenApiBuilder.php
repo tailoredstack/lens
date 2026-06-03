@@ -4,21 +4,21 @@ declare(strict_types=1);
 
 namespace Lens\Builder;
 
-use Lens\Infer\Engine;
 use Lens\Config\OpenApiConfig;
+use Lens\Infer\Engine;
+use Lens\Types\ArrayType;
+use Lens\Types\EnumType;
+use Lens\Types\LiteralInteger;
+use Lens\Types\LiteralString;
+use Lens\Types\LiteralType;
+use Lens\Types\MixedType;
 use Lens\Types\NamedObjectType;
+use Lens\Types\NamedObjectType as RefNamedObject;
+use Lens\Types\Nullable;
 use Lens\Types\ObjectType;
 use Lens\Types\PropertyType;
 use Lens\Types\ScalarType;
-use Lens\Types\Nullable;
-use Lens\Types\MixedType;
-use Lens\Types\ArrayType;
 use Lens\Types\UnionType;
-use Lens\Types\NamedObjectType as RefNamedObject;
-use Lens\Types\EnumType;
-use Lens\Types\LiteralString;
-use Lens\Types\LiteralInteger;
-use Lens\Types\LiteralType;
 
 final class OpenApiBuilder
 {

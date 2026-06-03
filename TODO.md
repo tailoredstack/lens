@@ -1,7 +1,7 @@
-# TODO — Tempest OpenAPI Live Status
+# TODO — Lens OpenAPI Live Status
 
 > **Updated:** 2026-06-04
-> **Status:** Pre‑development — all specs written, awaiting implementation start
+> **Status:** Phase 0.5 complete — core implementation functional
 
 ---
 
@@ -19,18 +19,30 @@
 - [x] Created test matrix (SPEC-TEST-MATRIX.md) — 46 items across 8 categories
 - [x] All 5 spec documents written to project root
 - [x] Created FEATURES.md — quick‑reference matrix (106 features, 90 supported)
+- [x] **Phase 0.1:** Scaffold package structure (composer.json, namespace, directories)
+- [x] **Phase 0.2:** Core implementation — Infer engine, Type system (19 classes), OpenAPI builder
+- [x] **Phase 0.3:** Namespace set to `Lens\*`
+- [x] **Phase 0.4:** Created `OpenApiConfig` config object
+- [x] **Phase 0.5:** CLI command (`bin/openapi`), Discovery integration stub
+- [x] Type system: 19 type classes + PropertyType DTO
+- [x] Infer engine: AST parsing, type inference, namespace resolution, docblock parsing
+- [x] OpenAPI builder: type→schema mapping, path generation, operation discovery
+- [x] CLI: JSON/YAML output, exclude patterns, include-internal flag
+- [x] 18 tests — all passing, 100% type coverage
+- [x] CI pipeline: fmt → lint → analyze → type-coverage → tests
+- [x] Pre-commit hook: all QA checks
 
 ## In Progress
 
-- *(none — awaiting Phase 0 execution)*
+- **Phase 1:** Tempest binding layer — route discovery, operation transformers, request/response mapping
 
 ## Next Up (Immediate)
 
-1. **Phase 0.1:** Scaffold package structure (`composer.json`, namespace, directories)
-2. **Phase 0.2:** Re‑implement core from SPEC-LARAVEL.md (Infer engine, Type system, OpenAPI builder)
-3. **Phase 0.3:** Renamespace to `Tempest\OpenApi\*`
-4. **Phase 0.4:** Create `OpenApiConfig` config object
-5. **Phase 0.5:** Wire via Tempest Discovery
+1. **Phase 1.1:** Implement Tempest route discovery (scan controllers, read attributes)
+2. **Phase 1.2:** Operation transformers (map controller methods → OpenAPI operations)
+3. **Phase 1.3:** Request mapping (Tempest Request → parameters/schema)
+4. **Phase 1.4:** Response mapping (return types → responses)
+5. **Phase 1.5:** Validation rules → OpenAPI constraints
 
 ## Blocked
 

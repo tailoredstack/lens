@@ -1,54 +1,106 @@
-# Tempest OpenAPI
+# Lens OpenAPI
 
-**Clean‑room OpenAPI 3.1 spec generator for [Tempest PHP](https://github.com/tempestphp/tempest-framework).**
+**OpenAPI 3.1 spec generator for PHP — static analysis, no runtime execution.**
 
-Adapts the architecture of `dedoc/scramble` (a Laravel OpenAPI generator) to the Tempest framework — replacing only the framework binding layer while preserving the framework‑agnostic core (Infer engine, PHP type system, OpenAPI builder).
+Generates OpenAPI 3.1 specifications from PHP type declarations, attributes, and docblocks. Built for Tempest PHP framework compatibility.
 
 ## Status
 
-**Pre‑development.** All specification documents are complete. Implementation has not started.
+**Phase 0.5 complete.** Core implementation functional:
+- ✅ Type system (19 type classes)
+- ✅ Infer engine (AST parsing, type inference)
+- ✅ OpenAPI builder (type→schema mapping)
+- ✅ CLI command (`bin/openapi`)
+- ✅ 100% test coverage (18 tests)
+
+## Installation
+
+```bash
+composer require lens/openapi
+```
+
+## Usage
+
+### CLI
+
+```bash
+# Generate to stdout
+bin/openapi
+
+# Generate JSON file
+bin/openapi -o openapi.json
+
+# Generate YAML with custom title
+bin/openapi -f yaml -o openapi.yaml --title "My API" --version "1.0.0"
+
+# Exclude namespaces
+bin/openapi --exclude "App\\Internal" --exclude "App\\Tests"
+
+# Include __magic methods
+bin/openapi --include-internal
+```
+
+### Composer Scripts
+
+```bash
+composer openapi          # Generate openapi.json
+composer openapi -- -f yaml -o spec.yaml
+```
+
+### Programmatic
+
+```php
+use Lens\OpenApi;
+use Lens\Config\OpenApiConfig;
+
+$config = new OpenApiConfig(
+    sources: ['/path/to/src'],
+    title: 'My API',
+    version: '1.0.0',
+    basePath: '/api/v1',
+    exclude: ['App\\Internal'],
+);
+
+$spec = OpenApi::generate($config);
+```
+
+## Features
+
+- **Static analysis** — no runtime execution required
+- **Type inference** — parses PHP type declarations, nullable, union, intersection types
+- **Attribute support** — detects `#[Get]`, `#[Post]`, `#[Route]` attributes
+- **Docblock parsing** — reads `@var`, `@route` annotations
+- **OpenAPI 3.1** — generates compliant specifications
+- **JSON/YAML output** — choose your format
+- **100% type coverage** — enforced via Pest type-coverage plugin
+
+## QA Commands
+
+```bash
+composer fmt           # Format code
+composer lint          # Run linter
+composer analyze       # Static analysis
+composer type-coverage # Type coverage (100% required)
+composer test:local    # Run tests
+composer qa            # Run all checks
+```
 
 ## Documents
 
 | File | Purpose |
 |------|---------|
-| [`SPEC-LARAVEL.md`](SPEC-LARAVEL.md) | Clean‑room reconstruction of Scramble's architecture (5 subsystems, framework‑agnostic) |
-| [`SPEC-TEMPEST.md`](SPEC-TEMPEST.md) | Tempest binding spec — every extension contract mapped to Tempest equivalents |
-| [`ROADMAP.md`](ROADMAP.md) | Development plan (8 phases, 8 milestones, ~8 weeks) |
-| [`TODO.md`](TODO.md) | Live status tracker — what's done, what's next, known risks |
-| [`FEATURES.md`](FEATURES.md) | Quick‑reference matrix — 106 features across 10 categories (90 supported) |
-| [`SPEC-TEST-MATRIX.md`](SPEC-TEST-MATRIX.md) | 1:1 Laravel-to-Tempest feature mapping with edge cases |
-
-## Quick Stats
-
-- **106 features** mapped across 10 categories
-- **90 fully compatible** (85%), **5 partial**, **9 unsupported**
-- **2,274 lines** of architectural specification
-- **33 Tempest packages** analyzed via source inspection
-- **~135 Scramble files** analyzed for clean‑room reconstruction
+| [`SPEC-LARAVEL.md`](SPEC-LARAVEL.md) | Clean‑room reconstruction of Scramble's architecture |
+| [`SPEC-TEMPEST.md`](SPEC-TEMPEST.md) | Tempest binding spec |
+| [`ROADMAP.md`](ROADMAP.md) | Development plan (8 phases) |
+| [`TODO.md`](TODO.md) | Live status tracker |
+| [`FEATURES.md`](FEATURES.md) | Feature matrix (106 features) |
+| [`SPEC-TEST-MATRIX.md`](SPEC-TEST-MATRIX.md) | Test coverage mapping |
 
 ## Architecture
 
-The core pipeline never executes application code — all analysis is static (AST + reflection):
-
 ```
-Source Code → Route Discovery → Operation Transformation → Type Inference → Type→Schema Mapping → Document Assembly → OpenAPI 3.1 Spec
+Source Code → Infer Engine → Type System → OpenAPI Builder → Spec
 ```
-
-## Package Development
-
-This package follows Tempest's official package development conventions:
-
-| Aspect | Approach |
-|--------|----------|
-| Registration | `composer.json` with `extra.tempest.can-discover: true` (no service providers) |
-| Discovery | `Discovery` + `#[ConsoleCommand]` + config files auto-discovered via Composer metadata |
-| Installer | `#[Installer]` attribute + `PublishesFiles` trait for publishing config to user's project |
-| Bootstrapping | `#[EventHandler(KernelEvent::BOOTED)]` for any runtime setup |
-| Testing | Extends `Tempest\Framework\Testing\IntegrationTest` |
-| Config | Plain PHP file returning a config object (`openapi.config.php`) |
-
-For details, see [`SPEC-TEMPEST.md` §7.3](SPEC-TEMPEST.md#73-package-registration).
 
 ## License
 

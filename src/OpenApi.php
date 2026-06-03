@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Lens;
 
-use Lens\Infer\Engine;
 use Lens\Builder\OpenApiBuilder;
 use Lens\Config\OpenApiConfig;
+use Lens\Infer\Engine;
 
 final class OpenApi
 {

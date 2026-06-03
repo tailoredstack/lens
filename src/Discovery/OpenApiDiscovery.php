@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Lens\Discovery;
 
+use Lens\Config\OpenApiConfig;
+use Lens\OpenApi;
 use Tempest\Discovery\Discovery;
 use Tempest\Discovery\DiscoveryLocation;
-use Lens\OpenApi;
-use Lens\Config\OpenApiConfig;
 
 final class OpenApiDiscovery implements Discovery
 {

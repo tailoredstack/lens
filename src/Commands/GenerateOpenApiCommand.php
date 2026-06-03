@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Lens\Commands;
 
-use Lens\OpenApi;
 use Lens\Config\OpenApiConfig;
+use Lens\OpenApi;
 use Symfony\Component\Yaml\Yaml;
 
 final class GenerateOpenApiCommand

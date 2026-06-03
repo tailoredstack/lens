@@ -4,28 +4,27 @@ declare(strict_types=1);
 
 namespace Lens\Infer;
 
-use PhpParser\ParserFactory;
-use PhpParser\Node;
-use PhpParser\NodeTraverser;
-use PhpParser\NodeVisitorAbstract;
-use PhpParser\Node\Stmt\Class_;
-use PhpParser\Node\Stmt\ClassMethod;
-use PhpParser\Node\Param;
-use PhpParser\Node\Stmt\Namespace_;
-use PhpParser\Node\Stmt\Property;
-use PhpParser\Node\NullableType;
-use PhpParser\Node\UnionType as PhpUnionType;
-use PhpParser\Node\IntersectionType as PhpIntersectionType;
-use PhpParser\Node\Stmt\Use_;
-use PhpParser\Node\Stmt\UseUse;
-
-use Lens\Types\NamedObjectType;
-use Lens\Types\PropertyType;
-use Lens\Types\ScalarType;
-use Lens\Types\Nullable;
-use Lens\Types\UnionType;
 use Lens\Types\IntersectionType;
 use Lens\Types\MixedType;
+use Lens\Types\NamedObjectType;
+use Lens\Types\Nullable;
+use Lens\Types\PropertyType;
+use Lens\Types\ScalarType;
+use Lens\Types\UnionType;
+use PhpParser\Node;
+use PhpParser\Node\IntersectionType as PhpIntersectionType;
+use PhpParser\Node\NullableType;
+use PhpParser\Node\Param;
+use PhpParser\Node\Stmt\Class_;
+use PhpParser\Node\Stmt\ClassMethod;
+use PhpParser\Node\Stmt\Namespace_;
+use PhpParser\Node\Stmt\Property;
+use PhpParser\Node\Stmt\Use_;
+use PhpParser\Node\Stmt\UseUse;
+use PhpParser\Node\UnionType as PhpUnionType;
+use PhpParser\NodeTraverser;
+use PhpParser\NodeVisitorAbstract;
+use PhpParser\ParserFactory;
 
 final class Engine
 {
@@ -50,7 +49,7 @@ final class Engine
     {
         $paths = $this->sources === [] ? [getcwd() . '/src'] : $this->sources;
 
-        $parser = (new ParserFactory())->createForNewestSupportedVersion();
+        $parser = new ParserFactory()->createForNewestSupportedVersion();
 
         $collected = [];
         $operations = [];
@@ -135,7 +134,7 @@ final class Engine
                                 $type = $this->mapTypeNode($typeNode);
 
                                 // if name type resolved to NamedObjectType, resolve imports/namespace
-                                if ($type instanceof NamedObjectType && !str_contains($type->className, '\\')) {
+                                if ($type instanceof NamedObjectType && ! str_contains($type->className, '\\')) {
                                     $resolved = $this->resolveName($type->className);
                                     $type = new NamedObjectType($resolved);
                                 }
@@ -166,7 +165,7 @@ final class Engine
                             }
 
                             foreach ($stmt->params as $param) {
-                                if (! ($param instanceof Param)) {
+                                if (! $param instanceof Param) {
                                     continue;
                                 }
 
@@ -178,7 +177,7 @@ final class Engine
                                 $vname = $param->var->name;
                                 $type = $this->mapTypeNode($param->type);
 
-                                if ($type instanceof NamedObjectType && !str_contains($type->className, '\\')) {
+                                if ($type instanceof NamedObjectType && ! str_contains($type->className, '\\')) {
                                     $resolved = $this->resolveName($type->className);
                                     $type = new NamedObjectType($resolved);
                                 }
@@ -215,7 +214,7 @@ final class Engine
                                     $lname = strtolower($an);
 
                                     // Tempest attributes: #[Get], #[Post], #[Put], #[Patch], #[Delete]
-                                    if (in_array($lname, ['get','post','put','patch','delete'], true)) {
+                                    if (in_array($lname, ['get', 'post', 'put', 'patch', 'delete'], true)) {
                                         $http = $lname;
                                         $args = $attr->args;
                                         if (isset($args[0]) && $args[0]->value instanceof Node\Scalar\String_) {
@@ -305,7 +304,7 @@ final class Engine
                         // union in docblock
                         if (str_contains($typeStr, '|')) {
                             $parts = explode('|', $typeStr);
-                            $mapped = array_map(fn($p) => $this->mapSimpleStringType(trim($p)), $parts);
+                            $mapped = array_map(fn ($p) => $this->mapSimpleStringType(trim($p)), $parts);
                             return new UnionType(...$mapped);
                         }
 
@@ -332,7 +331,7 @@ final class Engine
                         }
 
                         // primitives
-                        if (in_array($s, ['int','integer','float','string','bool','boolean'], true)) {
+                        if (in_array($s, ['int', 'integer', 'float', 'string', 'bool', 'boolean'], true)) {
                             $map = ['integer' => 'int', 'boolean' => 'bool'];
                             $s = $map[$s] ?? $s;
                             return new ScalarType($s === 'integer' ? 'int' : ($s === 'boolean' ? 'bool' : $s));
@@ -369,7 +368,7 @@ final class Engine
 
                         if ($node instanceof Node\Identifier) {
                             $name = $node->toString();
-                            if (in_array($name, ['string','int','float','bool'], true)) {
+                            if (in_array($name, ['string', 'int', 'float', 'bool'], true)) {
                                 return new ScalarType($name);
                             }
                             // fallback
